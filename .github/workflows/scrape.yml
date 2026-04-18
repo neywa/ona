@@ -3,10 +3,17 @@ name: Scrape
 on:
   schedule:
     - cron: "0 * * * *"
+  workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+    defaults:
+      run:
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
 
@@ -16,10 +23,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install ./scraper
+        run: pip install httpx feedparser supabase python-dotenv beautifulsoup4
 
       - name: Run scraper
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: python -m scraper.main
