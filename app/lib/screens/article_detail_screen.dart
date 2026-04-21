@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -100,58 +101,113 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   Widget _buildFallback(ThemeData theme) {
     final article = widget.article;
     final publishedAt = article.publishedAt ?? article.createdAt;
+    final sourceColor = HSLColor.fromAHSL(
+      1.0,
+      (article.source.hashCode % 360).toDouble().abs(),
+      0.6,
+      0.4,
+    ).toColor();
+    final onSurface = theme.colorScheme.onSurface;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            article.title,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: theme.dividerColor),
+              borderRadius: BorderRadius.circular(14),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '${article.source} · ${_formatDate(publishedAt)}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          if (article.tags.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: article.tags
-                  .map(
-                    (t) => Chip(
-                      label: Text(t),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Chip(
+                      label: Text(article.source),
+                      backgroundColor: sourceColor.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: sourceColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      side: BorderSide(
+                        color: sourceColor.withValues(alpha: 0.4),
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
-                  )
-                  .toList(),
-            ),
-          ],
-          if (article.summary != null && article.summary!.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              article.summary!,
-              style: theme.textTheme.bodyLarge,
-            ),
-          ],
-          const SizedBox(height: 28),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.open_in_browser),
-              label: const Text('Open in Browser'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    article.title,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Text(
+                        _formatDate(publishedAt),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '·',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: onSurface.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        timeago.format(publishedAt),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (article.summary != null &&
+                      article.summary!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      article.summary!,
+                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+                    ),
+                  ],
+                  if (article.tags.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: article.tags
+                          .map(
+                            (t) => Chip(
+                              label: Text(t),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ],
               ),
-              onPressed: _openInBrowser,
             ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            icon: const Icon(Icons.open_in_browser),
+            label: const Text('Open in Browser'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            onPressed: _openInBrowser,
           ),
         ],
       ),

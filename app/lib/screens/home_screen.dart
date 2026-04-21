@@ -19,10 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ArticleRepository _repository = ArticleRepository();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
 
   List<Article> _articles = [];
+  List<Article> _filteredArticles = [];
   List<String> _sources = [];
   String? _selectedSource;
+  String _searchQuery = '';
   bool _isLoading = true;
   int _offset = 0;
   bool _hasMore = true;
@@ -39,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -64,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (reset) {
       setState(() {
         _articles = [];
+        _filteredArticles = [];
         _offset = 0;
         _hasMore = true;
         _isLoading = true;
@@ -87,6 +92,38 @@ class _HomeScreenState extends State<HomeScreen> {
       _hasMore = results.length == _pageSize;
       _isLoading = false;
     });
+    _filterArticles();
+  }
+
+  List<Article> _applyFilter(List<Article> source) {
+    final q = _searchQuery.trim().toLowerCase();
+    if (q.isEmpty) return List.of(source);
+    return source.where((a) {
+      final title = a.title.toLowerCase();
+      final summary = a.summary?.toLowerCase() ?? '';
+      return title.contains(q) || summary.contains(q);
+    }).toList();
+  }
+
+  void _filterArticles() {
+    setState(() {
+      _filteredArticles = _applyFilter(_articles);
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value;
+    });
+    _filterArticles();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+    _filterArticles();
   }
 
   void _onSourceSelected(String? source) {
@@ -116,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const Text('OpenShift News'),
             Text(
-              '${_articles.length} articles',
+              '${_filteredArticles.length} articles',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -131,10 +168,38 @@ class _HomeScreenState extends State<HomeScreen> {
             selectedSource: _selectedSource,
             onSourceSelected: _onSourceSelected,
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'Search articles...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 12,
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => _loadArticles(reset: true),
-              child: _buildList(),
+              child: _buildList(theme),
             ),
           ),
         ],
@@ -142,32 +207,74 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildList() {
-    if (_articles.isEmpty && !_isLoading) {
+  Widget _buildList(ThemeData theme) {
+    if (_filteredArticles.isEmpty && _searchQuery.isNotEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 200),
-          Center(child: Text('No articles found')),
+        children: [
+          const SizedBox(height: 120),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 56,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
+                const SizedBox(height: 12),
+                Text('No results for "$_searchQuery"'),
+                TextButton(
+                  onPressed: _clearSearch,
+                  child: const Text('Clear search'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_filteredArticles.isEmpty && !_isLoading) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          const SizedBox(height: 120),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.rss_feed,
+                  size: 56,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                ),
+                const SizedBox(height: 12),
+                const Text('No articles yet'),
+                const SizedBox(height: 4),
+                Text('Pull to refresh', style: theme.textTheme.bodySmall),
+              ],
+            ),
+          ),
         ],
       );
     }
 
     final showLoader = _isLoading;
-    final itemCount = _articles.length + (showLoader ? 1 : 0);
+    final itemCount = _filteredArticles.length + (showLoader ? 1 : 0);
 
     return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        if (index >= _articles.length) {
+        if (index >= _filteredArticles.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        final article = _articles[index];
+        final article = _filteredArticles[index];
         return ArticleCard(
           article: article,
           onTap: () => _onArticleTap(article),

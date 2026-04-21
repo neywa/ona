@@ -16,6 +16,7 @@ class ArticleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
     final sourceColor = HSLColor.fromAHSL(
       1.0,
       (article.source.hashCode % 360).toDouble().abs(),
@@ -26,46 +27,66 @@ class ArticleCard extends StatelessWidget {
         ? article.source.substring(0, 1).toUpperCase()
         : '?';
     final when = article.publishedAt ?? article.createdAt;
+    final visibleTags = article.tags.take(3).toList();
+    final hasSummary = article.summary != null && article.summary!.isNotEmpty;
 
     return Card(
-      elevation: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: sourceColor,
-                  borderRadius: BorderRadius.circular(8),
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 3, color: sourceColor),
+            Expanded(
+              child: ListTile(
+                isThreeLine: true,
+                onTap: onTap,
+                contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: sourceColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    color: Colors.white,
+                title: Text(
+                  article.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
+                subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      article.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    if (hasSummary) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        article.summary!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: 6),
                     Row(
                       children: [
@@ -73,26 +94,24 @@ class ArticleCard extends StatelessWidget {
                           child: Text(
                             article.source,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.7),
+                              color: onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ),
                         Text(
                           timeago.format(when),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.7),
+                            color: onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
                     ),
-                    if (article.tags.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                    if (visibleTags.isNotEmpty) ...[
+                      const SizedBox(height: 6),
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
-                        children: article.tags
+                        children: visibleTags
                             .map(
                               (t) => Chip(
                                 label: Text(
@@ -114,8 +133,8 @@ class ArticleCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
