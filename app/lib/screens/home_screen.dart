@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/article.dart';
 import '../repositories/article_repository.dart';
 import '../theme/app_theme.dart';
+import '../theme/theme_notifier.dart';
 import '../utils/favicons.dart';
 import '../widgets/article_card.dart';
 import 'about_screen.dart';
@@ -52,6 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _hasMore = true;
   int _bottomNavIndex = 0;
   ViewMode _viewMode = ViewMode.grid;
+
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+  Color get _surface => _isDark ? kSurface : kLightSurface;
+  Color get _surface2 => _isDark ? kSurface2 : kLightSurface2;
+  Color get _border => _isDark ? kBorder : kLightBorder;
+  Color get _textPrimary => _isDark ? kTextPrimary : kLightTextPrimary;
+  Color get _textSecondary =>
+      _isDark ? kTextSecondary : kLightTextSecondary;
+  Color get _textMuted => _isDark ? kTextMuted : kLightTextMuted;
 
   @override
   void initState() {
@@ -196,10 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMobile(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const Icon(Icons.menu, color: kTextSecondary, size: 20),
+        leading: Icon(Icons.menu, color: _textSecondary, size: 20),
         title: const Text('OPENSHIFT NEWS'),
         actions: [
-          const Icon(Icons.search, color: kTextSecondary, size: 20),
+          Icon(Icons.search, color: _textSecondary, size: 20),
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(
@@ -207,11 +218,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? Icons.view_list_rounded
                   : Icons.grid_view_rounded,
               size: 20,
-              color: kTextSecondary,
+              color: _textSecondary,
             ),
             onPressed: () => setState(
               () => _viewMode =
                   _viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid,
+            ),
+          ),
+          Consumer<ThemeNotifier>(
+            builder: (context, notifier, _) => IconButton(
+              icon: Icon(
+                notifier.isDark ? Icons.light_mode : Icons.dark_mode,
+                size: 20,
+                color: _textSecondary,
+              ),
+              onPressed: notifier.toggle,
             ),
           ),
           GestureDetector(
@@ -247,14 +268,14 @@ class _HomeScreenState extends State<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: () => _loadArticles(reset: true),
         color: kRed,
-        backgroundColor: kSurface,
+        backgroundColor: _surface,
         child: _buildMobileList(),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: kSurface,
+        backgroundColor: _surface,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: kRed,
-        unselectedItemColor: kTextMuted,
+        unselectedItemColor: _textMuted,
         showUnselectedLabels: true,
         currentIndex: _bottomNavIndex,
         selectedLabelStyle: const TextStyle(fontSize: 10, letterSpacing: 1.0),
@@ -312,11 +333,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _mobileChip(String label, bool selected, VoidCallback onTap) {
     return Material(
-      color: selected ? kRed : kSurface2,
+      color: selected ? kRed : _surface2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: selected ? Colors.transparent : kBorder,
+          color: selected ? Colors.transparent : _border,
         ),
       ),
       child: InkWell(
@@ -330,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.0,
-              color: selected ? Colors.white : kTextSecondary,
+              color: selected ? Colors.white : _textSecondary,
             ),
           ),
         ),
@@ -348,11 +369,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.search_off, size: 56, color: kTextMuted),
+                Icon(Icons.search_off, size: 56, color: _textMuted),
                 const SizedBox(height: 12),
                 Text(
                   'No results for "$_searchQuery"',
-                  style: const TextStyle(color: kTextSecondary),
+                  style: TextStyle(color: _textSecondary),
                 ),
                 TextButton(
                   onPressed: () {
@@ -371,22 +392,22 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_filteredArticles.isEmpty && !_isLoading) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 120),
+        children: [
+          const SizedBox(height: 120),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.rss_feed, size: 56, color: kTextMuted),
-                SizedBox(height: 12),
+                Icon(Icons.rss_feed, size: 56, color: _textMuted),
+                const SizedBox(height: 12),
                 Text(
                   'No articles yet',
-                  style: TextStyle(color: kTextSecondary),
+                  style: TextStyle(color: _textSecondary),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Pull to refresh',
-                  style: TextStyle(color: kTextMuted, fontSize: 11),
+                  style: TextStyle(color: _textMuted, fontSize: 11),
                 ),
               ],
             ),
@@ -443,14 +464,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final counts = _sourceCounts;
     return Container(
       width: 240,
-      decoration: const BoxDecoration(
-        color: kSurface,
-        border: Border(right: BorderSide(color: kBorder)),
+      decoration: BoxDecoration(
+        color: _surface,
+        border: Border(right: BorderSide(color: _border)),
       ),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(24),
+          Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -460,18 +481,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 2,
-                    color: kTextPrimary,
+                    color: _textPrimary,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Precision Intelligence',
-                  style: TextStyle(fontSize: 11, color: kTextMuted),
+                  style: TextStyle(fontSize: 11, color: _textMuted),
                 ),
               ],
             ),
           ),
-          const Divider(color: kBorder, height: 1),
+          Divider(color: _border, height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: _navItem(
@@ -481,16 +502,16 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => _onSourceSelected(null),
             ),
           ),
-          const Divider(color: kBorder, height: 1),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Divider(color: _border, height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'SOURCES',
                 style: TextStyle(
                   fontSize: 10,
-                  color: kTextMuted,
+                  color: _textMuted,
                   letterSpacing: 2,
                 ),
               ),
@@ -505,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const Divider(color: kBorder, height: 1),
+          Divider(color: _border, height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -525,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? 'Last update: ${timeago.format(_lastUpdate!)}'
                         : 'Last update: n/a',
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10, color: kTextMuted),
+                    style: TextStyle(fontSize: 10, color: _textMuted),
                   ),
                 ),
               ],
@@ -558,13 +579,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 16, color: selected ? kRed : kTextSecondary),
+              Icon(icon, size: 16, color: selected ? kRed : _textSecondary),
               const SizedBox(width: 10),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: selected ? kTextPrimary : kTextSecondary,
+                  color: selected ? _textPrimary : _textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -584,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? kSurface2 : Colors.transparent,
+            color: selected ? _surface2 : Colors.transparent,
             border: Border(
               left: BorderSide(
                 color: selected ? kRed : Colors.transparent,
@@ -603,12 +624,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   placeholder: (_, __) => Container(
                     width: 16,
                     height: 16,
-                    color: kBorder,
+                    color: _border,
                   ),
                   errorWidget: (_, __, ___) => Container(
                     width: 16,
                     height: 16,
-                    color: kBorder,
+                    color: _border,
                   ),
                 ),
               ),
@@ -619,13 +640,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: selected ? kTextPrimary : kTextSecondary,
+                    color: selected ? _textPrimary : _textSecondary,
                   ),
                 ),
               ),
               Text(
                 count.toString().padLeft(2, '0'),
-                style: const TextStyle(fontSize: 12, color: kTextMuted),
+                style: TextStyle(fontSize: 12, color: _textMuted),
               ),
             ],
           ),
@@ -647,8 +668,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDesktopTopBar() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kBorder)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: _border)),
       ),
       child: Row(
         children: [
@@ -656,30 +677,34 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               height: 40,
               decoration: BoxDecoration(
-                color: kSurface,
-                border: Border.all(color: kBorder),
+                color: _surface,
+                border: Border.all(color: _border),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                style: const TextStyle(fontSize: 13, color: kTextPrimary),
+                style: TextStyle(fontSize: 13, color: _textPrimary),
                 cursorColor: kRed,
                 textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search technical intelligence...',
-                  hintStyle: TextStyle(color: kTextMuted, fontSize: 13),
-                  prefixIcon: Icon(Icons.search, color: kTextMuted, size: 18),
+                  hintStyle: TextStyle(color: _textMuted, fontSize: 13),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: _textMuted,
+                    size: 18,
+                  ),
                   border: InputBorder.none,
                   isCollapsed: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 16),
           IconButton(
-            icon: const Icon(Icons.refresh, color: kTextSecondary),
+            icon: Icon(Icons.refresh, color: _textSecondary),
             tooltip: 'Refresh',
             onPressed: () => _loadArticles(reset: true),
           ),
@@ -689,15 +714,27 @@ class _HomeScreenState extends State<HomeScreen> {
             onChanged: (mode) => setState(() => _viewMode = mode),
           ),
           const SizedBox(width: 4),
-          const IconButton(
-            icon: Icon(Icons.notifications_none, color: kTextSecondary),
+          IconButton(
+            icon: Icon(Icons.notifications_none, color: _textSecondary),
             onPressed: null,
           ),
           const SizedBox(width: 4),
           IconButton(
-            icon: const Icon(Icons.settings, color: kTextSecondary),
+            icon: Icon(Icons.settings, color: _textSecondary),
             tooltip: 'About',
             onPressed: _openAbout,
+          ),
+          const SizedBox(width: 8),
+          Consumer<ThemeNotifier>(
+            builder: (context, notifier, _) => IconButton(
+              icon: Icon(
+                notifier.isDark ? Icons.light_mode : Icons.dark_mode,
+                size: 18,
+                color: _textSecondary,
+              ),
+              onPressed: notifier.toggle,
+              tooltip: notifier.isDark ? 'Light mode' : 'Dark mode',
+            ),
           ),
         ],
       ),
@@ -710,22 +747,22 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Engineering Feed',
                   style: TextStyle(
-                    color: kTextPrimary,
+                    color: _textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Aggregated insights for SRE and DevOps operations.',
-                  style: TextStyle(color: kTextSecondary, fontSize: 13),
+                  style: TextStyle(color: _textSecondary, fontSize: 13),
                 ),
               ],
             ),
@@ -746,8 +783,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return FilledButton(
       onPressed: onTap,
       style: FilledButton.styleFrom(
-        backgroundColor: selected ? kRed : kSurface2,
-        foregroundColor: selected ? Colors.white : kTextSecondary,
+        backgroundColor: selected ? kRed : _surface2,
+        foregroundColor: selected ? Colors.white : _textSecondary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
         ),
@@ -768,11 +805,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 56, color: kTextMuted),
+            Icon(Icons.search_off, size: 56, color: _textMuted),
             const SizedBox(height: 12),
             Text(
               'No results for "$_searchQuery"',
-              style: const TextStyle(color: kTextSecondary),
+              style: TextStyle(color: _textSecondary),
             ),
             TextButton(
               onPressed: () {
@@ -791,8 +828,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_filteredArticles.isEmpty) {
-      return const Center(
-        child: Text('No articles yet', style: TextStyle(color: kTextSecondary)),
+      return Center(
+        child: Text(
+          'No articles yet',
+          style: TextStyle(color: _textSecondary),
+        ),
       );
     }
 
@@ -858,20 +898,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       width: 280,
-      decoration: const BoxDecoration(
-        color: kSurface,
-        border: Border(left: BorderSide(color: kBorder)),
+      decoration: BoxDecoration(
+        color: _surface,
+        border: Border(left: BorderSide(color: _border)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "TODAY'S TOP SOURCES",
               style: TextStyle(
                 fontSize: 10,
-                color: kTextMuted,
+                color: _textMuted,
                 letterSpacing: 2,
               ),
             ),
@@ -881,13 +921,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
             ],
             const SizedBox(height: 12),
-            const Divider(color: kBorder),
+            Divider(color: _border),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'POPULAR TAGS',
               style: TextStyle(
                 fontSize: 10,
-                color: kTextMuted,
+                color: _textMuted,
                 letterSpacing: 2,
               ),
             ),
@@ -900,7 +940,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            const Divider(color: kBorder),
+            Divider(color: _border),
             const SizedBox(height: 24),
             _systemStatusCard(),
           ],
@@ -919,12 +959,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 source,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: kTextPrimary),
+                style: TextStyle(fontSize: 12, color: _textPrimary),
               ),
             ),
             Text(
               '$count posts',
-              style: const TextStyle(fontSize: 11, color: kTextMuted),
+              style: TextStyle(fontSize: 11, color: _textMuted),
             ),
           ],
         ),
@@ -937,7 +977,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   height: 2,
                   width: constraints.maxWidth,
-                  color: kBorder,
+                  color: _border,
                 ),
                 Container(
                   height: 2,
@@ -956,15 +996,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: kSurface2,
-        border: Border.all(color: kBorder),
+        color: _surface2,
+        border: Border.all(color: _border),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         '#$tag',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
-          color: kTextSecondary,
+          color: _textSecondary,
           letterSpacing: 0.5,
         ),
       ),
@@ -975,11 +1015,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kSurface2,
-        border: Border.all(color: kBorder),
+        color: _surface2,
+        border: Border.all(color: _border),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -987,11 +1027,11 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: kTextPrimary,
+              color: _textPrimary,
             ),
           ),
-          SizedBox(height: 12),
-          Row(
+          const SizedBox(height: 12),
+          const Row(
             children: [
               _StatusDot(),
               SizedBox(width: 8),
@@ -1005,10 +1045,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Scraper runs every 60 minutes via GitHub Actions',
-            style: TextStyle(fontSize: 11, color: kTextMuted, height: 1.5),
+            style: TextStyle(fontSize: 11, color: _textMuted, height: 1.5),
           ),
         ],
       ),
@@ -1021,20 +1061,21 @@ class _PollingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final muted = textMutedOf(context);
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
+        const SizedBox(
           width: 20,
           height: 20,
           child: CircularProgressIndicator(color: kRed, strokeWidth: 2),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Text(
           'POLLING SOURCES...',
-          style: TextStyle(fontSize: 11, color: kTextMuted, letterSpacing: 2),
+          style: TextStyle(fontSize: 11, color: muted, letterSpacing: 2),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -1064,11 +1105,12 @@ class _ViewToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final border = borderOf(context);
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: kBorder),
+        border: Border.all(color: border),
         borderRadius: BorderRadius.circular(6),
-        color: kSurface,
+        color: surfaceOf(context),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
@@ -1079,7 +1121,7 @@ class _ViewToggle extends StatelessWidget {
             selected: viewMode == ViewMode.grid,
             onTap: () => onChanged(ViewMode.grid),
           ),
-          Container(width: 1, height: 28, color: kBorder),
+          Container(width: 1, height: 28, color: border),
           _ToggleBtn(
             icon: Icons.view_list_rounded,
             selected: viewMode == ViewMode.list,
@@ -1104,6 +1146,7 @@ class _ToggleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final secondary = textSecondaryOf(context);
     return Material(
       color: selected ? kRed.withValues(alpha: 0.15) : Colors.transparent,
       child: InkWell(
@@ -1115,7 +1158,7 @@ class _ToggleBtn extends StatelessWidget {
             child: Icon(
               icon,
               size: 16,
-              color: selected ? kRed : kTextSecondary,
+              color: selected ? kRed : secondary,
             ),
           ),
         ),

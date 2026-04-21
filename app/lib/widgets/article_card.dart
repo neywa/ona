@@ -20,6 +20,12 @@ class ArticleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final secondary = textSecondaryOf(context);
+    final muted = textMutedOf(context);
+    final border = theme.dividerColor;
+    final titleColor = theme.colorScheme.onSurface;
+
     final when = article.publishedAt ?? article.createdAt;
     final maxTags = compact ? 2 : 3;
     final visibleTags = article.tags.take(maxTags).toList();
@@ -29,9 +35,9 @@ class ArticleCard extends StatelessWidget {
     final titleMaxLines = compact ? 1 : 2;
 
     return Material(
-      color: kSurface,
+      color: theme.cardColor,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: kBorder, width: 0.5),
+        side: BorderSide(color: border, width: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       clipBehavior: Clip.antiAlias,
@@ -63,12 +69,12 @@ class ArticleCard extends StatelessWidget {
                               placeholder: (context, url) => Container(
                                 width: 20,
                                 height: 20,
-                                color: kBorder,
+                                color: border,
                               ),
                               errorWidget: (context, url, error) => Container(
                                 width: 20,
                                 height: 20,
-                                color: kBorder,
+                                color: border,
                               ),
                             ),
                           ),
@@ -77,8 +83,8 @@ class ArticleCard extends StatelessWidget {
                             child: Text(
                               article.source.toUpperCase(),
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: kTextSecondary,
+                              style: TextStyle(
+                                color: secondary,
                                 fontSize: 11,
                                 letterSpacing: 1.5,
                                 fontWeight: FontWeight.w600,
@@ -88,8 +94,8 @@ class ArticleCard extends StatelessWidget {
                           const Spacer(),
                           Text(
                             timeago.format(when),
-                            style: const TextStyle(
-                              color: kTextMuted,
+                            style: TextStyle(
+                              color: muted,
                               fontSize: 11,
                             ),
                           ),
@@ -100,8 +106,8 @@ class ArticleCard extends StatelessWidget {
                         article.title,
                         maxLines: titleMaxLines,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: kTextPrimary,
+                        style: TextStyle(
+                          color: titleColor,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           height: 1.3,
@@ -113,8 +119,8 @@ class ArticleCard extends StatelessWidget {
                           article.summary!,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: kTextSecondary,
+                          style: TextStyle(
+                            color: secondary,
                             fontSize: 13,
                             height: 1.5,
                           ),

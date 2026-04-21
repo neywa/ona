@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_notifier.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +36,12 @@ Future<void> main() async {
 
   await Supabase.initialize(url: url, anonKey: anonKey);
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider<ThemeNotifier>(
+      create: (_) => ThemeNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -42,10 +49,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'OpenShift News Aggregator',
-      theme: appTheme(),
-      home: const HomeScreen(),
+    return Consumer<ThemeNotifier>(
+      builder: (context, notifier, _) => MaterialApp(
+        title: 'OpenShift News Aggregator',
+        theme: lightTheme(),
+        darkTheme: appTheme(),
+        themeMode: notifier.mode,
+        home: const HomeScreen(),
+      ),
     );
   }
 }
