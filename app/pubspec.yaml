@@ -55,6 +55,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/icon.png
     - assets/.env
 
   # To add assets to your application, add an assets section, like this:
@@ -91,7 +92,7 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/ona_app_icon.png"
+  image_path: "assets/icon.png"
   min_sdk_android: 21
   web:
     generate: false

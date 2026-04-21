@@ -4,6 +4,7 @@ import '../models/article.dart';
 import '../repositories/article_repository.dart';
 import '../widgets/article_card.dart';
 import '../widgets/source_filter_bar.dart';
+import 'about_screen.dart';
 import 'article_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -160,6 +161,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'About',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
