@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Icon(Icons.menu, color: _textSecondary, size: 20),
-        title: const Text('OPENSHIFT NEWS'),
+        title: const Text('SHIFTFEED'),
         actions: [
           Icon(Icons.search, color: _textSecondary, size: 20),
           const SizedBox(width: 8),
@@ -476,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'OPENSHIFT NEWS',
+                  'SHIFTFEED',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -486,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Precision Intelligence',
+                  'OpenShift Community Intelligence',
                   style: TextStyle(fontSize: 11, color: _textMuted),
                 ),
               ],

@@ -72,7 +72,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'OpenShift News Aggregator',
+                    'ShiftFeed',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -86,7 +86,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'All OpenShift news in one place',
+                    'OpenShift Community Intelligence',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: onSurface.withValues(alpha: 0.8),
                     ),

@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, notifier, _) => MaterialApp(
-        title: 'OpenShift News Aggregator',
+        title: 'ShiftFeed',
         theme: lightTheme(),
         darkTheme: appTheme(),
         themeMode: notifier.mode,
