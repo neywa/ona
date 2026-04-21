@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/article.dart';
 import '../repositories/article_repository.dart';
@@ -136,12 +138,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onArticleTap(Article article) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ArticleDetailScreen(article: article),
-      ),
-    );
+    if (kIsWeb) {
+      launchUrl(
+        Uri.parse(article.url),
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ArticleDetailScreen(article: article),
+        ),
+      );
+    }
   }
 
   @override
