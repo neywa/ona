@@ -1,140 +1,150 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../models/article.dart';
+import '../theme/app_theme.dart';
+import '../utils/favicons.dart';
 
 class ArticleCard extends StatelessWidget {
   final Article article;
   final VoidCallback onTap;
+  final bool compact;
 
   const ArticleCard({
     super.key,
     required this.article,
     required this.onTap,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final onSurface = theme.colorScheme.onSurface;
-    final sourceColor = HSLColor.fromAHSL(
-      1.0,
-      (article.source.hashCode % 360).toDouble().abs(),
-      0.6,
-      0.4,
-    ).toColor();
-    final initial = article.source.isNotEmpty
-        ? article.source.substring(0, 1).toUpperCase()
-        : '?';
     final when = article.publishedAt ?? article.createdAt;
-    final visibleTags = article.tags.take(3).toList();
-    final hasSummary = article.summary != null && article.summary!.isNotEmpty;
+    final maxTags = compact ? 2 : 3;
+    final visibleTags = article.tags.take(maxTags).toList();
+    final hasSummary = !compact &&
+        article.summary != null &&
+        article.summary!.isNotEmpty;
+    final titleMaxLines = compact ? 1 : 2;
 
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      clipBehavior: Clip.antiAlias,
+    return Material(
+      color: kSurface,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: theme.dividerColor),
-        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: kBorder, width: 0.5),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 3, color: sourceColor),
-            Expanded(
-              child: ListTile(
-                isThreeLine: true,
-                onTap: onTap,
-                contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: sourceColor,
-                    borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 3, color: kRed),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: compact ? 10 : 16,
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    initial,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  article.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (hasSummary) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        article.summary!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: onSurface.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            article.source,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: onSurface.withValues(alpha: 0.7),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: CachedNetworkImage(
+                              imageUrl: faviconUrl(article.source),
+                              width: 20,
+                              height: 20,
+                              placeholder: (context, url) => Container(
+                                width: 20,
+                                height: 20,
+                                color: kBorder,
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                width: 20,
+                                height: 20,
+                                color: kBorder,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              article.source.toUpperCase(),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: kTextSecondary,
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            timeago.format(when),
+                            style: const TextStyle(
+                              color: kTextMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        article.title,
+                        maxLines: titleMaxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: kTextPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
                         ),
+                      ),
+                      if (hasSummary) ...[
+                        const SizedBox(height: 8),
                         Text(
-                          timeago.format(when),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: onSurface.withValues(alpha: 0.7),
+                          article.summary!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: kTextSecondary,
+                            fontSize: 13,
+                            height: 1.5,
                           ),
                         ),
                       ],
-                    ),
-                    if (visibleTags.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: visibleTags
-                            .map(
-                              (t) => Chip(
-                                label: Text(
-                                  t,
-                                  style: const TextStyle(fontSize: 11),
+                      if (visibleTags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          runSpacing: 4,
+                          children: [
+                            for (int i = 0; i < visibleTags.length; i++) ...[
+                              if (i > 0) const SizedBox(width: 12),
+                              Text(
+                                '#${visibleTags[i]}',
+                                style: const TextStyle(
+                                  color: kRed,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                padding: EdgeInsets.zero,
-                                labelPadding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                ),
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                visualDensity: VisualDensity.compact,
                               ),
-                            )
-                            .toList(),
-                      ),
+                            ],
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

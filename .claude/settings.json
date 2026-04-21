@@ -15,7 +15,8 @@
       "Bash(flutter analyze *)",
       "Bash(flutter build *)",
       "Bash(git mv *)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(git rm *)"
     ]
   }
 }
