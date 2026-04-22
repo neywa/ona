@@ -7,6 +7,7 @@ from scraper.fcm import FCMSender
 from scraper.notified_cache import NotifiedCache
 from scraper.sources.cve_tagger import enrich_with_cve_tags
 from scraper.sources.github_releases import fetch_github_releases
+from scraper.sources.ocp_versions import fetch_ocp_version_updates
 from scraper.sources.rss import fetch_all_rss
 from scraper.sources.security import fetch_security_advisories
 from scraper.supabase_client import SupabaseClient
@@ -17,6 +18,8 @@ def main() -> None:
         f"=== OpenShift News Scraper started === {datetime.now(timezone.utc).isoformat()}"
     )
 
+    client = SupabaseClient()
+
     rss_articles = [enrich_with_cve_tags(a) for a in fetch_all_rss()]
     github_articles = [
         enrich_with_cve_tags(a) for a in fetch_github_releases()
@@ -24,17 +27,33 @@ def main() -> None:
     security_articles = [
         enrich_with_cve_tags(a) for a in fetch_security_advisories()
     ]
+    try:
+        result = (
+            client.client.table("ocp_versions").select("id").limit(1).execute()
+        )
+        is_first_run = len(result.data) == 0
+    except Exception:
+        is_first_run = False
 
-    all_articles = rss_articles + github_articles + security_articles
+    ocp_articles = [
+        enrich_with_cve_tags(a)
+        for a in fetch_ocp_version_updates(client, seed_only=is_first_run)
+    ]
+    if is_first_run:
+        print("OCP versions: seeded table, no articles generated")
+
+    all_articles = (
+        rss_articles + github_articles + security_articles + ocp_articles
+    )
 
     print(f"RSS articles: {len(rss_articles)}")
     print(f"GitHub release articles: {len(github_articles)}")
     print(f"Security advisory articles: {len(security_articles)}")
+    print(f"OCP version update articles: {len(ocp_articles)}")
     tagged_cve_count = sum(1 for a in all_articles if "cve" in a.tags)
     print(f"Articles with CVE tags: {tagged_cve_count}")
     print(f"Total: {len(all_articles)}")
 
-    client = SupabaseClient()
     for article in all_articles:
         client.upsert_article(article)
 
