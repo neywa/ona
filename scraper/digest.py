@@ -53,6 +53,8 @@ class DigestGenerator:
             ]
         )
 
+        formatted_date = date.today().strftime("%A, %B %-d %Y")
+
         message = self.client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=600,
@@ -65,7 +67,7 @@ for the OpenShift and Kubernetes community.
 Based on these articles from today, write a concise daily briefing
 for SREs and DevOps engineers. Use this exact format:
 
-🔴 ShiftFeed Daily Briefing — [Day, Date]
+🔴 ShiftFeed Daily Briefing — {formatted_date}
 
 **Top Stories**
 - [2-3 sentence summary of the most important story]
