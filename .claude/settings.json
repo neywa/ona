@@ -28,7 +28,8 @@
       "Bash(/home/roman/coding/shiftfeed/venv/bin/pip install *)",
       "Bash(/home/roman/coding/shiftfeed/venv/bin/python --version)",
       "Bash(/home/roman/coding/shiftfeed/venv/bin/python -m pip install google-auth)",
-      "Bash(./venv/bin/python -c ' *)"
+      "Bash(./venv/bin/python -c ' *)",
+      "Bash(/home/roman/coding/shiftfeed/venv/bin/python -m py_compile /home/roman/coding/shiftfeed/scraper/main.py)"
     ]
   }
 }

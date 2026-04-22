@@ -1,4 +1,5 @@
 import sys
+import time
 from datetime import datetime, timezone
 
 from scraper.fcm import FCMSender
@@ -28,8 +29,8 @@ def main() -> None:
     print(f"RSS articles: {len(rss_articles)}")
     print(f"GitHub release articles: {len(github_articles)}")
     print(f"Security advisory articles: {len(security_articles)}")
-    cve_count = sum(1 for a in all_articles if "cve" in a.tags)
-    print(f"Articles with CVE tags: {cve_count}")
+    tagged_cve_count = sum(1 for a in all_articles if "cve" in a.tags)
+    print(f"Articles with CVE tags: {tagged_cve_count}")
     print(f"Total: {len(all_articles)}")
 
     client = SupabaseClient()
@@ -48,44 +49,75 @@ def main() -> None:
     fcm = FCMSender()
     cache = NotifiedCache(client)
 
-    for article in all_articles:
-        if "cve" not in article.tags:
-            continue
-        if cache.is_notified(article.url):
-            continue
+    new_cves = [
+        a
+        for a in all_articles
+        if "cve" in a.tags and not cache.is_notified(a.url)
+    ]
+    new_releases = [
+        a
+        for a in all_articles
+        if "release" in a.tags and not cache.is_notified(a.url)
+    ]
 
-        severity = None
-        for tag in article.tags:
-            if tag in ("critical", "important", "moderate"):
-                severity = tag
-                break
+    cve_count = len(new_cves)
+    release_count = len(new_releases)
 
+    if cve_count == 1:
+        article = new_cves[0]
+        severity = next(
+            (
+                t
+                for t in article.tags
+                if t in ("critical", "important", "moderate")
+            ),
+            None,
+        )
         cve_id = next(
             (t for t in article.tags if t.startswith("CVE-")),
             "CVE",
         )
-
         fcm.send_cve_alert(
             cve_id=cve_id,
             title=article.title,
             severity=severity or "unknown",
             url=article.url,
         )
+    elif cve_count > 1:
+        first = new_cves[0]
+        body = first.title[:80] + f" and {cve_count - 1} more..."
+        fcm.send_to_topic(
+            topic="security",
+            title=f"🔴 {cve_count} New Security Advisories",
+            body=body,
+            data={"type": "cve_batch", "count": cve_count},
+        )
+
+    for article in new_cves:
         cache.mark_notified(article.url)
 
-    for article in all_articles:
-        if "release" not in article.tags:
-            continue
-        if cache.is_notified(article.url):
-            continue
+    if cve_count > 0 and release_count > 0:
+        time.sleep(1)
 
+    if release_count == 1:
+        article = new_releases[0]
         fcm.send_release_alert(
             title=article.title,
             url=article.url,
         )
+    elif release_count > 1:
+        first = new_releases[0]
+        fcm.send_to_topic(
+            topic="releases",
+            title=f"🚀 {release_count} New Releases",
+            body=first.title[:100],
+            data={"type": "release_batch", "count": release_count},
+        )
+
+    for article in new_releases:
         cache.mark_notified(article.url)
 
-    print("FCM notifications sent.")
+    print(f"Notified: {cve_count} CVEs, {release_count} releases")
 
     print(f"=== Scraper finished === {datetime.now(timezone.utc).isoformat()}")
 
