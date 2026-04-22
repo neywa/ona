@@ -5,6 +5,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/article.dart';
+import '../models/cve_alert.dart';
+import '../models/ocp_version.dart';
 import '../repositories/article_repository.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_notifier.dart';
@@ -13,10 +15,12 @@ import '../widgets/article_card.dart';
 import 'about_screen.dart';
 import 'article_detail_screen.dart';
 import 'digest_screen.dart';
+import 'versions_screen.dart';
 
 const double _desktopBreakpoint = 900;
 const Color _kReleaseGreen = Color(0xFF00AA44);
 const Color _kSecurityOrange = Color(0xFFFF6600);
+const String _kOcpVersionsSource = 'OCP Versions';
 
 enum ViewMode { grid, list }
 
@@ -49,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Article> _articles = [];
   List<Article> _filteredArticles = [];
   List<String> _sources = [];
+  List<OcpVersion> _ocpVersions = [];
+  List<CveAlert> _cveAlerts = [];
   String? _selectedSource;
   String? _tagFilter;
   String _searchQuery = '';
@@ -72,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _loadSources();
+    _loadOcpVersions();
+    _loadCveAlerts();
     _loadArticles(reset: true);
   }
 
@@ -113,6 +121,26 @@ class _HomeScreenState extends State<HomeScreen> {
     final sources = await _repository.fetchSources();
     if (!mounted) return;
     setState(() => _sources = sources);
+  }
+
+  Future<void> _loadOcpVersions() async {
+    final versions = await _repository.fetchOcpVersions();
+    if (!mounted) return;
+    setState(() => _ocpVersions = versions);
+  }
+
+  Future<void> _loadCveAlerts() async {
+    final alerts = await _repository.fetchCveAlerts(limit: 4);
+    if (!mounted) return;
+    setState(() => _cveAlerts = alerts);
+  }
+
+  List<OcpVersion> get _displayedOcpVersions {
+    final active = _ocpVersions
+        .where((v) => v.minorInt >= kOcpActiveMinorMinimum)
+        .toList()
+      ..sort((a, b) => b.minorInt.compareTo(a.minorInt));
+    return active.take(4).toList();
   }
 
   Future<void> _loadArticles({bool reset = false}) async {
@@ -214,6 +242,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const DigestScreen()),
+    );
+  }
+
+  void _openVersions() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const VersionsScreen()),
     );
   }
 
@@ -343,6 +378,10 @@ class _HomeScreenState extends State<HomeScreen> {
             _openAbout();
             return;
           }
+          if (i == 1) {
+            _openVersions();
+            return;
+          }
           if (i == 0) {
             setState(() => _bottomNavIndex = 0);
             return;
@@ -383,6 +422,12 @@ class _HomeScreenState extends State<HomeScreen> {
         _tagFilter == 'security',
         () => _onTagSelected('security'),
         selectedColor: _kSecurityOrange,
+      ),
+      _mobileChip(
+        'OCP',
+        _selectedSource == _kOcpVersionsSource,
+        () => _onSourceSelected(_kOcpVersionsSource),
+        selectedColor: _kReleaseGreen,
       ),
       for (final s in _sources)
         _mobileChip(
@@ -575,11 +620,21 @@ class _HomeScreenState extends State<HomeScreen> {
           Divider(color: _border, height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: _navItem(
-              icon: Icons.grid_view_rounded,
-              label: 'All News',
-              selected: _selectedSource == null,
-              onTap: () => _onSourceSelected(null),
+            child: Column(
+              children: [
+                _navItem(
+                  icon: Icons.grid_view_rounded,
+                  label: 'All News',
+                  selected: _selectedSource == null,
+                  onTap: () => _onSourceSelected(null),
+                ),
+                _navItem(
+                  icon: Icons.verified_outlined,
+                  label: 'OCP Versions',
+                  selected: false,
+                  onTap: _openVersions,
+                ),
+              ],
             ),
           ),
           Divider(color: _border, height: 1),
@@ -984,10 +1039,49 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border(left: BorderSide(color: _border)),
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 81, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_displayedOcpVersions.isNotEmpty) ...[
+              Text(
+                'LATEST OPENSHIFT RELEASES',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: _textMuted,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (int i = 0; i < _displayedOcpVersions.length; i++) ...[
+                _ocpVersionRow(
+                  _displayedOcpVersions[i],
+                  _ocpVersionAccent(i),
+                ),
+                const SizedBox(height: 10),
+              ],
+              const SizedBox(height: 12),
+              Divider(color: _border),
+              const SizedBox(height: 24),
+            ],
+            if (_cveAlerts.isNotEmpty) ...[
+              Text(
+                'LATEST CVES',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: _textMuted,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final alert in _cveAlerts) ...[
+                _cveAlertRow(alert),
+                const SizedBox(height: 10),
+              ],
+              const SizedBox(height: 12),
+              Divider(color: _border),
+              const SizedBox(height: 24),
+            ],
             if (_latestReleases.isNotEmpty) ...[
               Text(
                 'LATEST RELEASES',
@@ -1043,6 +1137,97 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _systemStatusCard(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Color _ocpVersionAccent(int index) {
+    if (index <= 1) return _kReleaseGreen;
+    if (index <= 3) return const Color(0xFFFFAA00);
+    return _textMuted;
+  }
+
+  Widget _ocpVersionRow(OcpVersion version, Color accent) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _openVersions,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              Icon(Icons.layers, size: 12, color: accent),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: version.minorVersion,
+                        style: TextStyle(
+                          color: _textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '  →  ${version.latestStable}',
+                        style: TextStyle(color: _textSecondary),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                timeago.format(version.updatedAt),
+                style: TextStyle(fontSize: 10, color: _textMuted),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _cveAlertRow(CveAlert alert) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => launchUrl(
+          Uri.parse(alert.articleUrl),
+          mode: LaunchMode.externalApplication,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.shield,
+                size: 12,
+                color: _kSecurityOrange,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  alert.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: _textPrimary),
+                ),
+              ),
+              if (alert.createdAt != null) ...[
+                const SizedBox(width: 4),
+                Text(
+                  timeago.format(alert.createdAt!),
+                  style: TextStyle(fontSize: 10, color: _textMuted),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

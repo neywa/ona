@@ -1,7 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/article.dart';
+import '../models/cve_alert.dart';
 import '../models/digest.dart';
+import '../models/ocp_version.dart';
 
 class ArticleRepository {
   final SupabaseClient _client = Supabase.instance.client;
@@ -51,6 +53,44 @@ class ArticleRepository {
       // ignore: avoid_print
       print('fetchLatestDigest error: $e');
       return null;
+    }
+  }
+
+  Future<List<CveAlert>> fetchCveAlerts({int limit = 10}) async {
+    try {
+      final response = await _client.from('cve_alerts').select();
+      final all = (response as List)
+          .map((row) => CveAlert.fromJson(row as Map<String, dynamic>))
+          .toList();
+      all.sort((a, b) {
+        final ad = a.createdAt;
+        final bd = b.createdAt;
+        if (ad == null && bd == null) return 0;
+        if (ad == null) return 1;
+        if (bd == null) return -1;
+        return bd.compareTo(ad);
+      });
+      return all.take(limit).toList();
+    } catch (e) {
+      // ignore: avoid_print
+      print('fetchCveAlerts error: $e');
+      return [];
+    }
+  }
+
+  Future<List<OcpVersion>> fetchOcpVersions() async {
+    try {
+      final response = await _client
+          .from('ocp_versions')
+          .select()
+          .order('minor_version', ascending: false);
+      return (response as List)
+          .map((row) => OcpVersion.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      // ignore: avoid_print
+      print('fetchOcpVersions error: $e');
+      return [];
     }
   }
 
