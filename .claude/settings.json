@@ -30,7 +30,12 @@
       "Bash(/home/roman/coding/shiftfeed/venv/bin/python -m pip install google-auth)",
       "Bash(./venv/bin/python -c ' *)",
       "Bash(/home/roman/coding/shiftfeed/venv/bin/python -m py_compile /home/roman/coding/shiftfeed/scraper/main.py)",
-      "Bash(python -c \"import ast; ast.parse\\(open\\('scraper/digest.py'\\).read\\(\\)\\); ast.parse\\(open\\('scraper/main.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
+      "Bash(python -c \"import ast; ast.parse\\(open\\('scraper/digest.py'\\).read\\(\\)\\); ast.parse\\(open\\('scraper/main.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(flutter --version)",
+      "Bash(unzip -p app/build/app/outputs/bundle/release/app-release.aab META-INF/UPLOAD.RSA)",
+      "Bash(keytool -printcert)",
+      "Bash(python3 -c \"import yaml; print\\('pyyaml:', yaml.__version__\\)\")",
+      "Bash(git log *)"
     ]
   }
 }
