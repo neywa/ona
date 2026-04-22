@@ -12,6 +12,7 @@ import '../utils/favicons.dart';
 import '../widgets/article_card.dart';
 import 'about_screen.dart';
 import 'article_detail_screen.dart';
+import 'digest_screen.dart';
 
 const double _desktopBreakpoint = 900;
 const Color _kReleaseGreen = Color(0xFF00AA44);
@@ -209,6 +210,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openDigest() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const DigestScreen()),
+    );
+  }
+
   void _comingSoon() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -252,6 +260,28 @@ class _HomeScreenState extends State<HomeScreen> {
               () => _viewMode =
                   _viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid,
             ),
+          ),
+          IconButton(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(Icons.auto_awesome, size: 20, color: _textSecondary),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: kRed,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            onPressed: _openDigest,
+            tooltip: 'AI Briefing',
           ),
           Consumer<ThemeNotifier>(
             builder: (context, notifier, _) => IconButton(
@@ -753,6 +783,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.refresh, color: _textSecondary),
             tooltip: 'Refresh',
             onPressed: () => _loadArticles(reset: true),
+          ),
+          IconButton(
+            icon: const Icon(Icons.auto_awesome, size: 18, color: kRed),
+            onPressed: _openDigest,
+            tooltip: 'AI Daily Briefing',
           ),
           const SizedBox(width: 8),
           _ViewToggle(

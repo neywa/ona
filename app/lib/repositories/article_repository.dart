@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/article.dart';
+import '../models/digest.dart';
 
 class ArticleRepository {
   final SupabaseClient _client = Supabase.instance.client;
@@ -33,6 +34,23 @@ class ArticleRepository {
       // ignore: avoid_print
       print('fetchArticles error: $e');
       return [];
+    }
+  }
+
+  Future<Digest?> fetchLatestDigest() async {
+    try {
+      final response = await _client
+          .from('digests')
+          .select()
+          .order('digest_date', ascending: false)
+          .limit(1);
+      final rows = response as List;
+      if (rows.isEmpty) return null;
+      return Digest.fromJson(rows.first as Map<String, dynamic>);
+    } catch (e) {
+      // ignore: avoid_print
+      print('fetchLatestDigest error: $e');
+      return null;
     }
   }
 
