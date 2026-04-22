@@ -26,3 +26,7 @@ firebase-service-account.json
 build/
 dist/
 *.egg-info/
+
+# Android signing — never commit
+keystore/
+**/android/key.properties
