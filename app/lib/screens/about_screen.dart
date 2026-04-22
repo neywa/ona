@@ -19,6 +19,11 @@ class AboutScreen extends StatelessWidget {
   ];
 
   static const _links = <_LinkItem>[
+    _LinkItem(
+      'Privacy Policy',
+      'https://neywa.github.io/app-privacy-policies/shiftfeed/',
+      Icons.privacy_tip_outlined,
+    ),
     _LinkItem('OpenShift Documentation', 'https://docs.openshift.com'),
     _LinkItem('Red Hat Blog', 'https://www.redhat.com/en/blog'),
     _LinkItem('Source Code', 'https://github.com/neywa/ona'),
@@ -138,7 +143,7 @@ class AboutScreen extends StatelessWidget {
               children: [
                 for (final link in _links)
                   ListTile(
-                    leading: const Icon(Icons.open_in_browser),
+                    leading: Icon(link.icon ?? Icons.open_in_browser),
                     title: Text(link.label),
                     onTap: () => _open(link.url),
                   ),
@@ -170,5 +175,6 @@ class _DataItem {
 class _LinkItem {
   final String label;
   final String url;
-  const _LinkItem(this.label, this.url);
+  final IconData? icon;
+  const _LinkItem(this.label, this.url, [this.icon]);
 }
