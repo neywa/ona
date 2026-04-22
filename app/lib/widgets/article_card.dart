@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -57,16 +56,12 @@ class ArticleCard extends StatelessWidget {
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
-      child: CachedNetworkImage(
-        imageUrl: faviconUrl(article.source),
+      child: Image.asset(
+        faviconAsset(article.source),
         width: 20,
         height: 20,
-        placeholder: (context, url) => Container(
-          width: 20,
-          height: 20,
-          color: border,
-        ),
-        errorWidget: (context, url, error) => Container(
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stack) => Container(
           width: 20,
           height: 20,
           color: border,

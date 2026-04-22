@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -668,16 +667,12 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(3),
-                child: CachedNetworkImage(
-                  imageUrl: faviconUrl(source),
+                child: Image.asset(
+                  faviconAsset(source),
                   width: 16,
                   height: 16,
-                  placeholder: (_, __) => Container(
-                    width: 16,
-                    height: 16,
-                    color: _border,
-                  ),
-                  errorWidget: (_, __, ___) => Container(
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
                     width: 16,
                     height: 16,
                     color: _border,

@@ -1,15 +1,14 @@
-const _defaultFavicon = 'https://icons.duckduckgo.com/ip3/redhat.com.ico';
+const _defaultFavicon = 'assets/favicons/redhat.png';
 
 const _faviconMap = {
-  'Red Hat Blog': 'https://icons.duckduckgo.com/ip3/redhat.com.ico',
-  'Red Hat Developer':
-      'https://icons.duckduckgo.com/ip3/developers.redhat.com.ico',
-  'Kubernetes Blog': 'https://icons.duckduckgo.com/ip3/kubernetes.io.ico',
-  'CNCF Blog': 'https://icons.duckduckgo.com/ip3/cncf.io.ico',
-  'Hacker News':
-      'https://icons.duckduckgo.com/ip3/news.ycombinator.com.ico',
-  'Reddit r/openshift': 'https://icons.duckduckgo.com/ip3/reddit.com.ico',
-  'GitHub Releases': 'https://icons.duckduckgo.com/ip3/github.com.ico',
+  'Red Hat Blog': 'assets/favicons/redhat.png',
+  'Red Hat Developer': 'assets/favicons/developers-redhat.png',
+  'Red Hat Security': 'assets/favicons/redhat.png',
+  'Kubernetes Blog': 'assets/favicons/kubernetes.png',
+  'CNCF Blog': 'assets/favicons/cncf.png',
+  'Hacker News': 'assets/favicons/hackernews.png',
+  'Reddit r/openshift': 'assets/favicons/reddit.png',
+  'GitHub Releases': 'assets/favicons/github.png',
 };
 
-String faviconUrl(String source) => _faviconMap[source] ?? _defaultFavicon;
+String faviconAsset(String source) => _faviconMap[source] ?? _defaultFavicon;
