@@ -13,6 +13,7 @@ jobs:
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     defaults:
       run:
         working-directory: .
@@ -25,7 +26,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install httpx feedparser supabase python-dotenv beautifulsoup4 google-auth
+        run: pip install httpx feedparser supabase python-dotenv beautifulsoup4 google-auth anthropic
 
       - name: Run scraper
         run: python -m scraper.main
