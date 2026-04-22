@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
@@ -145,6 +146,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return active.take(4).toList();
   }
 
+  String _buildVersionSummary() {
+    final versions = _displayedOcpVersions;
+    if (versions.isEmpty) return '';
+    final versionStrings = versions.map((v) => v.latestStable).toList();
+    if (versionStrings.length == 1) {
+      return 'Latest stable version is ${versionStrings[0]}';
+    }
+    final allButLast = versionStrings.sublist(0, versionStrings.length - 1);
+    final last = versionStrings.last;
+    return 'Latest stable versions are ${allButLast.join(', ')} and $last';
+  }
+
   Future<void> _loadArticles({bool reset = false}) async {
     if (reset) {
       setState(() {
@@ -281,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Icon(Icons.menu, color: _textSecondary, size: 20),
-        title: const Text('SHIFTFEED'),
+        title: const Text('ShiftFeed'),
         actions: [
           Icon(Icons.search, color: _textSecondary, size: 20),
           const SizedBox(width: 8),
@@ -598,24 +611,16 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SHIFTFEED',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
-                    color: _textPrimary,
-                  ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'ShiftFeed',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: _textPrimary,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'OpenShift Community Intelligence',
-                  style: TextStyle(fontSize: 11, color: _textMuted),
-                ),
-              ],
+              ),
             ),
           ),
           Divider(color: _border, height: 1),
@@ -1076,6 +1081,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 10),
               ],
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    final summary = _buildVersionSummary();
+                    if (summary.isEmpty) return;
+                    Clipboard.setData(ClipboardData(text: summary));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF00AA44),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                summary,
+                                style: const TextStyle(fontSize: 12),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        backgroundColor: const Color(0xFF1A1A1A),
+                        duration: const Duration(seconds: 3),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          side: const BorderSide(color: Color(0xFF2A2A2A)),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00AA44).withValues(alpha: 0.1),
+                      border: Border.all(
+                        color: const Color(0xFF00AA44).withValues(alpha: 0.4),
+                        width: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.copy, size: 10, color: Color(0xFF00AA44)),
+                        SizedBox(width: 3),
+                        Text(
+                          'COPY',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: Color(0xFF00AA44),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 12),
               Divider(color: _border),
               const SizedBox(height: 24),
