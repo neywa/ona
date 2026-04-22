@@ -35,7 +35,8 @@
       "Bash(unzip -p app/build/app/outputs/bundle/release/app-release.aab META-INF/UPLOAD.RSA)",
       "Bash(keytool -printcert)",
       "Bash(python3 -c \"import yaml; print\\('pyyaml:', yaml.__version__\\)\")",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(git status *)"
     ]
   }
 }
