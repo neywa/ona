@@ -51,6 +51,16 @@ RSS_SOURCES: list[RSSSource] = [
         "source": "Hacker News",
         "tags": ["community", "hackernews", "kubernetes"],
     },
+    {
+        "url": "https://hackernoon.com/tagged/kubernetes/feed",
+        "source": "HackerNoon",
+        "tags": ["blog", "kubernetes", "hackernoon"],
+    },
+    {
+        "url": "https://hackernoon.com/tagged/devops/feed",
+        "source": "HackerNoon",
+        "tags": ["blog", "devops", "hackernoon"],
+    },
 ]
 
 
