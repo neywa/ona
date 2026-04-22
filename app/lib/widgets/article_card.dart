@@ -8,6 +8,8 @@ import '../utils/favicons.dart';
 const _kReleaseGreen = Color(0xFF00AA44);
 const _kSecurityOrange = Color(0xFFFF6600);
 const _kGitHubGreen = Color(0xFF238636);
+const _kCriticalRed = Color(0xFFFF0000);
+const _kModerateAmber = Color(0xFFFFAA00);
 
 class ArticleCard extends StatelessWidget {
   final Article article;
@@ -25,7 +27,28 @@ class ArticleCard extends StatelessWidget {
   bool get _isSecurity =>
       article.tags.contains('security') || article.tags.contains('cve');
 
+  String? get _severity {
+    if (article.tags.contains('critical')) return 'CRITICAL';
+    if (article.tags.contains('important')) return 'IMPORTANT';
+    if (article.tags.contains('moderate')) return 'MODERATE';
+    return null;
+  }
+
+  Color _severityColor(String severity) {
+    switch (severity) {
+      case 'CRITICAL':
+        return _kCriticalRed;
+      case 'IMPORTANT':
+        return _kSecurityOrange;
+      case 'MODERATE':
+        return _kModerateAmber;
+    }
+    return _kSecurityOrange;
+  }
+
   Color _accentColor() {
+    final severity = _severity;
+    if (severity != null) return _severityColor(severity);
     if (_isSecurity) return _kSecurityOrange;
     if (_isRelease) return _kReleaseGreen;
     return kRed;
@@ -71,6 +94,10 @@ class ArticleCard extends StatelessWidget {
   }
 
   Widget? _buildBadge() {
+    final severity = _severity;
+    if (severity != null) {
+      return _badge(label: severity, color: _severityColor(severity));
+    }
     if (_isSecurity) {
       return _badge(label: 'SECURITY', color: _kSecurityOrange);
     }
