@@ -38,6 +38,11 @@ GITHUB_REPOS: list[dict[str, Any]] = [
         "source": "GitHub Releases",
         "tags": ["release", "istio", "servicemesh"],
     },
+    {
+        "repo": "quay/quay",
+        "source": "GitHub Releases",
+        "tags": ["release", "quay", "registry"],
+    },
 ]
 
 
