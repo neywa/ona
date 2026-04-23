@@ -19,6 +19,7 @@ import 'about_screen.dart';
 import 'article_detail_screen.dart';
 import 'bookmarks_screen.dart';
 import 'digest_screen.dart';
+import 'submit_screen.dart';
 import 'versions_screen.dart';
 
 const double _desktopBreakpoint = 900;
@@ -179,6 +180,13 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(builder: (_) => const BookmarksScreen()),
     ).then((_) => _loadBookmarkStates());
+  }
+
+  void _openSubmit() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SubmitScreen()),
+    );
   }
 
   List<OcpVersion> get _displayedOcpVersions {
@@ -421,6 +429,12 @@ class _HomeScreenState extends State<HomeScreen> {
         color: kRed,
         backgroundColor: _surface,
         child: _buildMobileList(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openSubmit,
+        backgroundColor: kRed,
+        tooltip: 'Submit a link',
+        child: const Icon(Icons.add_link, color: Colors.white),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: _surface,
@@ -695,6 +709,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'Saved',
                   selected: false,
                   onTap: _openBookmarks,
+                ),
+                _navItem(
+                  icon: Icons.add_link_outlined,
+                  label: 'Submit a Link',
+                  selected: false,
+                  onTap: _openSubmit,
                 ),
               ],
             ),
