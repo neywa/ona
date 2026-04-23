@@ -31,7 +31,11 @@
       "Bash(python3 -c \"from datetime import date; print\\(date.today\\(\\).strftime\\('%A, %B %-d %Y'\\)\\)\")",
       "Bash(unzip -p app/build/app/outputs/bundle/release/app-release.aab META-INF/UPLOAD.RSA)",
       "Bash(keytool -printcert)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(gh pr *)",
+      "Bash(curl -sSL \"https://www.projectquay.io/\")",
+      "Bash(curl -sSLI \"https://www.projectquay.io/\")",
+      "Bash(python -c \"from scraper.sources.github_releases import GITHUB_REPOS; print\\([r['repo'] for r in GITHUB_REPOS]\\)\")"
     ]
   }
 }
