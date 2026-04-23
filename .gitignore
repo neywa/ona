@@ -30,3 +30,6 @@ dist/
 # Android signing — never commit
 keystore/
 **/android/key.properties
+
+# Claude Code personal settings (never shared)
+.claude/settings.local.json
