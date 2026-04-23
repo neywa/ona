@@ -12,13 +12,13 @@ from scraper.models import Article
 _logger = logging.getLogger(__name__)
 
 _CVE_PATTERN = re.compile(r"CVE-\d{4}-\d+", re.IGNORECASE)
-_RELEVANT_KEYWORDS = ("openshift", "ocp", "kubernetes", "container", "podman")
+_RELEVANT_KEYWORDS = ("openshift", "ocp", "kubernetes", "container", "podman", "quay", "istio", "servicemesh", "envoy", "kiali")
 
 # Red Hat deprecated the legacy RSS errata feeds in favor of the JSON
 # Security Data API. We query it once per relevant package keyword and
 # dedupe by CVE id.
 _API_URL = "https://access.redhat.com/hydra/rest/securitydata/cve.json"
-_PACKAGE_QUERIES = ("openshift", "kubernetes", "podman")
+_PACKAGE_QUERIES = ("openshift", "kubernetes", "podman", "quay", "istio", "servicemesh")
 _PER_PAGE = 50
 _SOURCE = "Red Hat Security"
 _BASE_TAGS = ["security", "advisory"]
