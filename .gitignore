@@ -33,3 +33,6 @@ keystore/
 
 # Claude Code personal settings (never shared)
 .claude/settings.local.json
+
+# Supabase RLS hardening — keep private to avoid publishing the attack surface
+supabase/rls_policies.sql
