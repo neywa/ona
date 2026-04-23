@@ -38,7 +38,9 @@
       "Bash(python -c \"from scraper.sources.github_releases import GITHUB_REPOS; print\\([r['repo'] for r in GITHUB_REPOS]\\)\")",
       "Bash(gh run *)",
       "Bash(curl -sSL \"https://api.github.com/repos/quay/quay/releases?per_page=3\")",
-      "Bash(python3 -c \"import json,sys; r=json.load\\(sys.stdin\\); [print\\(x['tag_name'], x['published_at'], 'draft='+str\\(x['draft']\\), 'prerelease='+str\\(x['prerelease']\\)\\) for x in r]\")"
+      "Bash(python3 -c \"import json,sys; r=json.load\\(sys.stdin\\); [print\\(x['tag_name'], x['published_at'], 'draft='+str\\(x['draft']\\), 'prerelease='+str\\(x['prerelease']\\)\\) for x in r]\")",
+      "Bash(curl -sSL \"https://api.github.com/repos/Neywa/shiftfeed/actions/workflows/scrape.yml/runs?per_page=1&status=success\")",
+      "Bash(python3 -c \"import json,sys; r=json.load\\(sys.stdin\\); run=r['workflow_runs'][0]; print\\('updated_at:', run['updated_at']\\); print\\('run_started_at:', run.get\\('run_started_at'\\)\\); print\\('conclusion:', run['conclusion']\\); print\\('status:', run['status']\\)\")"
     ]
   }
 }
