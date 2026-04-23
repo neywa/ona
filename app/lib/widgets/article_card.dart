@@ -15,12 +15,18 @@ class ArticleCard extends StatelessWidget {
   final Article article;
   final VoidCallback onTap;
   final bool compact;
+  final bool showBookmarkButton;
+  final bool isBookmarked;
+  final VoidCallback? onBookmarkToggle;
 
   const ArticleCard({
     super.key,
     required this.article,
     required this.onTap,
     this.compact = false,
+    this.showBookmarkButton = false,
+    this.isBookmarked = false,
+    this.onBookmarkToggle,
   });
 
   bool get _isRelease => article.tags.contains('release');
@@ -204,6 +210,20 @@ class ArticleCard extends StatelessWidget {
                             timeago.format(when),
                             style: TextStyle(color: muted, fontSize: 11),
                           ),
+                          if (showBookmarkButton)
+                            GestureDetector(
+                              onTap: onBookmarkToggle,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Icon(
+                                  isBookmarked
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_outline,
+                                  size: 16,
+                                  color: isBookmarked ? kRed : muted,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 10),

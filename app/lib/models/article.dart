@@ -33,4 +33,15 @@ class Article {
       createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'url': url,
+        'source': source,
+        'tags': tags,
+        'summary': summary,
+        'published_at': publishedAt?.toUtc().toIso8601String(),
+        'created_at': createdAt.toUtc().toIso8601String(),
+      };
 }

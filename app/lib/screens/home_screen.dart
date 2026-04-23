@@ -10,12 +10,14 @@ import '../models/article.dart';
 import '../models/cve_alert.dart';
 import '../models/ocp_version.dart';
 import '../repositories/article_repository.dart';
+import '../services/bookmark_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_notifier.dart';
 import '../utils/favicons.dart';
 import '../widgets/article_card.dart';
 import 'about_screen.dart';
 import 'article_detail_screen.dart';
+import 'bookmarks_screen.dart';
 import 'digest_screen.dart';
 import 'versions_screen.dart';
 
@@ -58,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, int> _stableSourceCounts = {};
   List<OcpVersion> _ocpVersions = [];
   List<CveAlert> _cveAlerts = [];
+  Map<String, bool> _bookmarkStates = {};
   String? _selectedSource;
   String? _tagFilter;
   String _searchQuery = '';
@@ -85,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadOcpVersions();
     _loadCveAlerts();
     _loadArticles(reset: true);
+    _loadBookmarkStates();
   }
 
   @override
@@ -137,6 +141,44 @@ class _HomeScreenState extends State<HomeScreen> {
     final alerts = await _repository.fetchCveAlerts(limit: 4);
     if (!mounted) return;
     setState(() => _cveAlerts = alerts);
+  }
+
+  Future<void> _loadBookmarkStates() async {
+    final bookmarks = await BookmarkService.instance.getBookmarks();
+    if (!mounted) return;
+    setState(() {
+      _bookmarkStates = {for (final b in bookmarks) b.url: true};
+    });
+  }
+
+  Future<void> _toggleBookmark(Article article) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await BookmarkService.instance.toggleBookmark(article);
+    final bookmarked = await BookmarkService.instance.isBookmarked(article.url);
+    if (!mounted) return;
+    setState(() => _bookmarkStates[article.url] = bookmarked);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          bookmarked ? 'Article saved' : 'Bookmark removed',
+          style: const TextStyle(fontSize: 13),
+        ),
+        backgroundColor: const Color(0xFF1A1A1A),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+          side: const BorderSide(color: Color(0xFF2A2A2A)),
+        ),
+      ),
+    );
+  }
+
+  void _openBookmarks() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const BookmarksScreen()),
+    ).then((_) => _loadBookmarkStates());
   }
 
   List<OcpVersion> get _displayedOcpVersions {
@@ -394,6 +436,10 @@ class _HomeScreenState extends State<HomeScreen> {
             _openAbout();
             return;
           }
+          if (i == 2) {
+            _openBookmarks();
+            return;
+          }
           if (i == 1) {
             _openVersions();
             return;
@@ -581,6 +627,9 @@ class _HomeScreenState extends State<HomeScreen> {
             article: article,
             onTap: () => _onArticleTap(article, desktop: false),
             compact: _viewMode == ViewMode.list,
+            showBookmarkButton: true,
+            isBookmarked: _bookmarkStates[article.url] ?? false,
+            onBookmarkToggle: () => _toggleBookmark(article),
           ),
         );
       },
@@ -640,6 +689,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'OCP Versions',
                   selected: false,
                   onTap: _openVersions,
+                ),
+                _navItem(
+                  icon: Icons.bookmark_outline,
+                  label: 'Saved',
+                  selected: false,
+                  onTap: _openBookmarks,
                 ),
               ],
             ),
@@ -997,6 +1052,9 @@ class _HomeScreenState extends State<HomeScreen> {
           return ArticleCard(
             article: article,
             onTap: () => _onArticleTap(article, desktop: true),
+            showBookmarkButton: true,
+            isBookmarked: _bookmarkStates[article.url] ?? false,
+            onBookmarkToggle: () => _toggleBookmark(article),
           );
         },
       );
@@ -1020,6 +1078,9 @@ class _HomeScreenState extends State<HomeScreen> {
             article: article,
             onTap: () => _onArticleTap(article, desktop: true),
             compact: true,
+            showBookmarkButton: true,
+            isBookmarked: _bookmarkStates[article.url] ?? false,
+            onBookmarkToggle: () => _toggleBookmark(article),
           ),
         );
       },
