@@ -131,3 +131,68 @@ Today's articles:
         self._save_digest(summary, articles)
         print("Digest generated successfully.")
         return summary
+
+    # ---- Personalised digests (Phase 5) -------------------------------
+
+    # Mirrors the category mapping in scraper.sources.alert_rule_matcher
+    # so a digest filter feels identical to an alert rule's category filter.
+    _CATEGORY_TAG_MAP = {
+        "security": {"security", "cve"},
+        "releases": {"release"},
+        "ocp": {"ocp"},
+    }
+
+    def _fetch_articles_for(
+        self, target_date: date, categories: list[str] | None
+    ) -> list[dict]:
+        """Fetches up to 20 articles for ``target_date`` filtered to the
+        given categories (``None`` ⇒ all). Filtering happens client-side
+        because the category map is one-to-many (e.g. ``security`` matches
+        either ``security`` or ``cve`` tags) and Supabase's array
+        operators don't express that cleanly."""
+        try:
+            result = (
+                self.supabase.client.table("articles")
+                .select("title, url, source, tags, summary")
+                .gte("created_at", target_date.isoformat())
+                .order("created_at", desc=True)
+                .limit(50)
+                .execute()
+            )
+            rows = result.data or []
+            if not categories:
+                return rows[:20]
+            wanted: set[str] = set()
+            for cat in categories:
+                wanted.update(
+                    self._CATEGORY_TAG_MAP.get(cat.lower(), {cat.lower()})
+                )
+            filtered: list[dict] = []
+            for row in rows:
+                tags = {t.lower() for t in (row.get("tags") or [])}
+                if tags & wanted:
+                    filtered.append(row)
+                    if len(filtered) >= 20:
+                        break
+            return filtered
+        except Exception as e:
+            print(f"Failed to fetch filtered articles for digest: {e}")
+            return []
+
+    def generate_filtered(
+        self,
+        categories: list[str] | None,
+        target_date: date,
+    ) -> str | None:
+        """Generates a digest text string for ``target_date`` filtered to
+        the given ``categories`` (``None`` ⇒ all categories).
+
+        Unlike :meth:`generate`, this method does NOT upsert into the
+        ``digests`` table and does NOT send any FCM notification — it
+        simply returns the raw digest text, or ``None`` if no articles
+        match. Used by ``scraper.digest_personal`` to deliver per-user
+        scheduled briefings."""
+        articles = self._fetch_articles_for(target_date, categories)
+        if not articles:
+            return None
+        return self._generate_with_claude(articles)

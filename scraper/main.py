@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timezone
 
 from scraper.digest import DigestGenerator
+from scraper.digest_personal import run_personal_digests
 from scraper.fcm import FCMSender
 from scraper.notified_cache import NotifiedCache
 from scraper.sources.alert_rule_matcher import article_matches_rule
@@ -197,6 +198,9 @@ def main() -> None:
             body="Your OpenShift intelligence digest is ready. Tap to read.",
             data={"type": "digest"},
         )
+
+    # Stage 5: Personalised digests (Pro users with scheduled delivery)
+    run_personal_digests(client, fcm)
 
     print(f"=== Scraper finished === {datetime.now(timezone.utc).isoformat()}")
 

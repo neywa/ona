@@ -1,3 +1,11 @@
+"""
+Fetches Red Hat Security Data API CVEs and emits Article rows.
+
+When score data is available the resulting articles also carry a
+``cvss:X.X`` tag (e.g. ``cvss:8.5``) which Phase 4 alert rules read to
+decide whether a CVE clears the user's CVSS threshold.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -31,6 +39,49 @@ def _parse_public_date(raw: str | None) -> datetime | None:
         return datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError:
         return None
+
+
+def _extract_cvss_score(advisory: dict[str, Any]) -> float | None:
+    """
+    Returns the CVSS base score from a Red Hat Hydra CVE entry, rounded to
+    one decimal place. Returns ``None`` if no recognisable score is found
+    or any field is malformed — never raises.
+
+    The Hydra payload has historically used a few different shapes
+    (``cvss3_score`` is the most common today; older entries used
+    ``cvss_score``), and NVD-shaped responses nest the score under
+    ``metrics.cvssMetricV31[0].cvssData.baseScore``. We try them in turn
+    and take the first numeric value we can coerce to a float.
+    """
+    try:
+        candidates: list[Any] = [
+            advisory.get("cvss3_score"),
+            advisory.get("cvssScore"),
+            advisory.get("cvss_score"),
+        ]
+        cvss3 = advisory.get("cvss3")
+        if isinstance(cvss3, dict):
+            candidates.append(cvss3.get("score"))
+            candidates.append(cvss3.get("base_score"))
+        metrics = advisory.get("metrics")
+        if isinstance(metrics, dict):
+            v31 = metrics.get("cvssMetricV31")
+            if isinstance(v31, list) and v31:
+                first = v31[0]
+                if isinstance(first, dict):
+                    cvss_data = first.get("cvssData")
+                    if isinstance(cvss_data, dict):
+                        candidates.append(cvss_data.get("baseScore"))
+        for raw in candidates:
+            if raw is None or raw == "":
+                continue
+            try:
+                return round(float(raw), 1)
+            except (TypeError, ValueError):
+                continue
+    except Exception:
+        return None
+    return None
 
 
 def _is_relevant(entry: dict[str, Any]) -> bool:
@@ -67,6 +118,10 @@ def _article_from_cve(entry: dict[str, Any]) -> Article | None:
         cve_upper = cve.upper()
         if cve_upper not in tags:
             tags.append(cve_upper)
+
+    cvss_score = _extract_cvss_score(entry)
+    if cvss_score is not None:
+        tags.append(f"cvss:{cvss_score:.1f}")
 
     return Article(
         title=title,

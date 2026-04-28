@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/alert_rule_service.dart';
+import '../services/digest_pref_service.dart';
 import '../services/entitlement_service.dart';
 import '../services/notification_service.dart';
 import '../services/user_service.dart';
@@ -194,6 +195,29 @@ class AboutScreen extends StatelessWidget {
               shape: cardShape,
               clipBehavior: Clip.antiAlias,
               child: const _AlertRulesSection(),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+              child: Row(
+                children: [
+                  Text(
+                    'Daily Briefing',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const _ProBadge(),
+                ],
+              ),
+            ),
+            Card(
+              elevation: 0,
+              shape: cardShape,
+              clipBehavior: Clip.antiAlias,
+              child: const _DigestScheduleSection(),
             ),
             const SizedBox(height: 16),
           ],
@@ -852,6 +876,390 @@ class _AlertRuleEditSheetState extends State<_AlertRuleEditSheet> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DigestScheduleSection extends StatefulWidget {
+  const _DigestScheduleSection();
+
+  @override
+  State<_DigestScheduleSection> createState() => _DigestScheduleSectionState();
+}
+
+class _DigestScheduleSectionState extends State<_DigestScheduleSection> {
+  Future<bool>? _proCheck;
+  Future<DigestPrefs>? _prefsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _proCheck = EntitlementService.instance.isPro();
+    _prefsFuture = DigestPrefService.instance.getPrefs();
+  }
+
+  void _refreshPrefs() {
+    setState(() => _prefsFuture = DigestPrefService.instance.getPrefs());
+  }
+
+  Future<void> _showPaywall() async {
+    await PaywallSheet.show(context, reason: PaywallReason.briefing);
+    if (!mounted) return;
+    setState(() => _proCheck = EntitlementService.instance.isPro());
+  }
+
+  Future<void> _openSheet(DigestPrefs prefs) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _DigestScheduleSheet(
+        existing: prefs,
+        messenger: messenger,
+      ),
+    );
+    if (!mounted) return;
+    _refreshPrefs();
+  }
+
+  String _formatHour(int h) {
+    final period = h < 12 ? 'AM' : 'PM';
+    final hour12 = h % 12 == 0 ? 12 : h % 12;
+    return '$hour12:00 $period';
+  }
+
+  String _categoriesLabel(List<String> cats) {
+    if (cats.isEmpty) return 'All categories';
+    return cats.map((c) => c[0].toUpperCase() + c.substring(1)).join(' / ');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _proCheck,
+      builder: (context, proSnap) {
+        if (!proSnap.hasData) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        }
+        final isPro = proSnap.data == true;
+        if (!isPro) {
+          return InkWell(
+            onTap: _showPaywall,
+            child: const ListTile(
+              leading: Icon(Icons.schedule_outlined),
+              title: Text('Schedule daily briefing'),
+              subtitle: Text(
+                'Get the AI briefing in your inbox at the time you choose. '
+                'Upgrade to Pro to unlock.',
+              ),
+              trailing: Icon(Icons.chevron_right),
+            ),
+          );
+        }
+        return FutureBuilder<DigestPrefs>(
+          future: _prefsFuture,
+          builder: (context, prefsSnap) {
+            if (!prefsSnap.hasData) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            }
+            final prefs = prefsSnap.data!;
+            final title = prefs.enabled
+                ? 'Delivered daily at ${_formatHour(prefs.deliveryHour)}'
+                : 'On-demand only — tap to set a schedule';
+            final subtitle = prefs.enabled
+                ? '${prefs.timezone} · ${_categoriesLabel(prefs.categories)}'
+                : null;
+            return ListTile(
+              leading: const Icon(Icons.schedule_outlined),
+              title: Text(title),
+              subtitle: subtitle == null ? null : Text(subtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _openSheet(prefs),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _DigestScheduleSheet extends StatefulWidget {
+  final DigestPrefs existing;
+  final ScaffoldMessengerState messenger;
+
+  const _DigestScheduleSheet({
+    required this.existing,
+    required this.messenger,
+  });
+
+  @override
+  State<_DigestScheduleSheet> createState() => _DigestScheduleSheetState();
+}
+
+class _DigestScheduleSheetState extends State<_DigestScheduleSheet> {
+  static const _kCategoryLabels = {
+    'security': 'Security',
+    'releases': 'Releases',
+    'ocp': 'OCP',
+  };
+
+  late bool _enabled;
+  late int _deliveryHour;
+  late String _timezone;
+  late Set<String> _categories;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _enabled = widget.existing.enabled;
+    _deliveryHour = widget.existing.deliveryHour;
+    _timezone = widget.existing.timezone;
+    _categories = {...widget.existing.categories};
+    // First-time setup: pre-fill device IANA timezone if user has no row yet
+    if (widget.existing.id == null && _timezone == 'UTC') {
+      DigestPrefService.deviceTimezone().then((tz) {
+        if (!mounted) return;
+        setState(() => _timezone = tz);
+      });
+    }
+  }
+
+  String _formatHour(int h) {
+    final period = h < 12 ? 'AM' : 'PM';
+    final hour12 = h % 12 == 0 ? 12 : h % 12;
+    return '$hour12:00 $period';
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _deliveryHour, minute: 0),
+    );
+    if (picked != null && mounted) {
+      setState(() => _deliveryHour = picked.hour);
+    }
+  }
+
+  Future<void> _editTimezone() async {
+    final controller = TextEditingController(text: _timezone);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Timezone'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Europe/Prague',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'e.g. Europe/Prague, America/New_York, Asia/Tokyo',
+              style: TextStyle(fontSize: 11),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty && mounted) {
+      setState(() => _timezone = result);
+    }
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      final prefs = widget.existing.copyWith(
+        enabled: _enabled,
+        deliveryHour: _deliveryHour,
+        timezone: _timezone,
+        categories: _categories.toList()..sort(),
+      );
+      await DigestPrefService.instance.savePrefs(prefs);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      widget.messenger.showSnackBar(
+        SnackBar(content: Text('Could not save schedule: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final disabled = !_enabled;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        20 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: theme.dividerColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text(
+              'Daily briefing schedule',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Schedule daily delivery'),
+              subtitle: const Text(
+                'When off, you can still open the briefing on-demand.',
+              ),
+              value: _enabled,
+              onChanged: (v) => setState(() => _enabled = v),
+            ),
+            const SizedBox(height: 4),
+            Opacity(
+              opacity: disabled ? 0.5 : 1.0,
+              child: IgnorePointer(
+                ignoring: disabled,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.access_time),
+                      title: const Text('Delivery time'),
+                      subtitle: Text(_formatHour(_deliveryHour)),
+                      trailing: const Icon(Icons.edit_outlined),
+                      onTap: _pickTime,
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.public),
+                      title: const Text('Timezone'),
+                      subtitle: Text(_timezone),
+                      trailing: const Icon(Icons.edit_outlined),
+                      onTap: _editTimezone,
+                    ),
+                    const SizedBox(height: 8),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Categories'),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilterChip(
+                          label: const Text('All'),
+                          selected: _categories.isEmpty,
+                          onSelected: (_) {
+                            setState(() => _categories.clear());
+                          },
+                        ),
+                        for (final entry in _kCategoryLabels.entries)
+                          FilterChip(
+                            label: Text(entry.value),
+                            selected: _categories.contains(entry.key),
+                            onSelected: (sel) {
+                              setState(() {
+                                if (sel) {
+                                  _categories.add(entry.key);
+                                } else {
+                                  _categories.remove(entry.key);
+                                }
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _saving ? null : () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _saving ? null : _save,
+                    style: FilledButton.styleFrom(backgroundColor: kRed),
+                    child: _saving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
