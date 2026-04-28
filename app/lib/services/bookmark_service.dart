@@ -31,8 +31,13 @@ const String _kPrefsBookmarksKey = 'bookmarks';
 /// Phase 2. Read once on first init, URLs extracted, then deleted.
 const String _kLegacyBookmarksKey = 'bookmarked_articles';
 
-/// SharedPreferences flag set after a successful local→cloud migration.
-const String _kMigratedFlagKey = 'bookmarks_migrated_to_cloud';
+/// SharedPreferences flag set after a successful local→cloud migration,
+/// keyed by user_id so a sign-out / sign-in-as-different-user combo on the
+/// same device still triggers the migration for the new account.
+String _migratedFlagKey() {
+  final uid = UserService.instance.currentUser?.id ?? 'anonymous';
+  return 'bookmarks_migrated_to_cloud_$uid';
+}
 
 /// Name of the Supabase table holding per-user bookmark rows.
 const String _kCloudTable = 'user_bookmarks';
@@ -270,11 +275,11 @@ class BookmarkService {
     if (!UserService.instance.isSignedIn) return;
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(_kMigratedFlagKey) == true) return;
+      if (prefs.getBool(_migratedFlagKey()) == true) return;
       await _migrateLegacyLocalFormatIfNeeded(prefs);
       final urls = prefs.getStringList(_kPrefsBookmarksKey) ?? const [];
       if (urls.isEmpty) {
-        await prefs.setBool(_kMigratedFlagKey, true);
+        await prefs.setBool(_migratedFlagKey(), true);
         return;
       }
       final uid = UserService.instance.currentUser!.id;
@@ -286,7 +291,7 @@ class BookmarkService {
             onConflict: 'user_id,article_url',
           );
       await prefs.remove(_kPrefsBookmarksKey);
-      await prefs.setBool(_kMigratedFlagKey, true);
+      await prefs.setBool(_migratedFlagKey(), true);
     } catch (e) {
       debugPrint('[BookmarkService] migrateLocalToCloud failed: $e');
     }

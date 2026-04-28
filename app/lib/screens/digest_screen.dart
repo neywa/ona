@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/digest.dart';
 import '../repositories/article_repository.dart';
+import '../services/export_service.dart';
 import '../theme/app_theme.dart';
 
 const Color _kSecurityOrange = Color(0xFFFF6600);
@@ -56,6 +57,19 @@ class _DigestScreenState extends State<DigestScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.ios_share,
+              size: 20,
+              color: textSecondary,
+            ),
+            tooltip: 'Share briefing',
+            onPressed: (_isLoading || _digest == null)
+                ? null
+                : () => ExportService.instance.shareDigest(_digest!.summary),
+          ),
+        ],
         backgroundColor: bgOf(context),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),

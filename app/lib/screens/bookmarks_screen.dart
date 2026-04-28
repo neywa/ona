@@ -5,6 +5,7 @@ import '../models/article.dart';
 import '../repositories/article_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/entitlement_service.dart';
+import '../services/export_service.dart';
 import '../services/user_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/article_card.dart';
@@ -48,6 +49,44 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     launchUrl(
       Uri.parse(article.url),
       mode: LaunchMode.externalApplication,
+    );
+  }
+
+  Future<void> _showExportSheet() async {
+    final scaffoldContext = context;
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.text_snippet_outlined),
+                title: const Text('Export as Markdown'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  ExportService.instance.shareBookmarks(
+                    scaffoldContext,
+                    asPdf: false,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: const Text('Export as PDF'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  ExportService.instance.shareBookmarks(
+                    scaffoldContext,
+                    asPdf: true,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -107,6 +146,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               ),
             ),
             actions: [
+              if (urls.isNotEmpty)
+                _ExportAction(onTriggered: _showExportSheet),
               const _SyncIndicator(),
               if (urls.isNotEmpty)
                 IconButton(
@@ -191,6 +232,32 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               onTap: () => _openArticle(article),
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+class _ExportAction extends StatelessWidget {
+  final VoidCallback onTriggered;
+  const _ExportAction({required this.onTriggered});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: EntitlementService.instance.isPro(),
+      builder: (context, snap) {
+        final isPro = snap.data ?? false;
+        return IconButton(
+          icon: Icon(Icons.ios_share, color: textSecondaryOf(context)),
+          tooltip: 'Export bookmarks',
+          onPressed: () {
+            if (isPro) {
+              onTriggered();
+            } else {
+              PaywallSheet.show(context, reason: PaywallReason.briefing);
+            }
+          },
         );
       },
     );
