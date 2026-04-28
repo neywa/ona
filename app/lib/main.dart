@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -7,9 +11,18 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'screens/home_screen.dart';
+import 'services/entitlement_service.dart';
 import 'services/notification_service.dart';
+import 'services/user_service.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_notifier.dart';
+
+// TODO: replace REVENUECAT_*_KEY placeholders with real keys from RevenueCat dashboard
+const String _rcApiKeyAndroid = 'REVENUECAT_ANDROID_KEY';
+const String _rcApiKeyApple = 'REVENUECAT_APPLE_KEY';
+
+// TODO: register shiftfeed://auth-callback as a redirect URL in the
+// Supabase dashboard under Authentication > URL Configuration
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,9 +64,17 @@ Future<void> main() async {
       badge: true,
       sound: true,
     );
-    await messaging.subscribeToTopic('all');
-    await messaging.subscribeToTopic('security');
-    await messaging.subscribeToTopic('releases');
+
+    try {
+      final rcKey = Platform.isAndroid ? _rcApiKeyAndroid : _rcApiKeyApple;
+      await EntitlementService.instance.init(rcKey);
+    } catch (e) {
+      debugPrint('RevenueCat init failed: $e');
+    }
+
+    final isPro = await EntitlementService.instance.isPro();
+    await NotificationService.applyTopicSubscriptions(isPro: isPro);
+
     final token = await messaging.getToken();
     debugPrint('FCM Token: $token');
   }
@@ -66,8 +87,49 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  AppLinks? _appLinks;
+  StreamSubscription<Uri>? _linkSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinks();
+  }
+
+  Future<void> _initDeepLinks() async {
+    if (kIsWeb) return;
+    try {
+      _appLinks = AppLinks();
+      final initialUri = await _appLinks!.getInitialLink();
+      if (initialUri != null) {
+        await UserService.instance.handleDeepLink(initialUri);
+      }
+      _linkSub = _appLinks!.uriLinkStream.listen(
+        (uri) {
+          UserService.instance.handleDeepLink(uri);
+        },
+        onError: (Object e) {
+          debugPrint('Deep-link stream error: $e');
+        },
+      );
+    } catch (e) {
+      debugPrint('Deep-link init failed: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _linkSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

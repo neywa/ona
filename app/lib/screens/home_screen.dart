@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -13,10 +14,12 @@ import '../models/cve_alert.dart';
 import '../models/ocp_version.dart';
 import '../repositories/article_repository.dart';
 import '../services/bookmark_service.dart';
+import '../services/entitlement_service.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_notifier.dart';
 import '../utils/favicons.dart';
 import '../widgets/article_card.dart';
+import '../widgets/paywall_sheet.dart';
 import 'about_screen.dart';
 import 'article_detail_screen.dart';
 import 'bookmarks_screen.dart';
@@ -73,6 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _searchDebounce;
   bool _showSearchBar = false;
 
+  bool _isPro = false;
+  bool _showTrialExpiredBanner = false;
+
+  static const String _kTrialBannerDismissedPref = 'trial_banner_dismissed';
+
   List<Article> get _displayArticles =>
       _isSearchMode ? _searchResults : _filteredArticles;
 
@@ -95,8 +103,38 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadCveAlerts();
     _loadTopTags();
     _loadScraperStatus();
-    _loadArticles(reset: true);
+    _bootstrapEntitlement();
     _loadBookmarkStates();
+  }
+
+  Future<void> _bootstrapEntitlement() async {
+    final isPro = await EntitlementService.instance.isPro();
+    if (!mounted) return;
+    setState(() => _isPro = isPro);
+    await _loadArticles(reset: true);
+    if (!isPro) {
+      final expired = await EntitlementService.instance.hasExpiredTrial();
+      if (!mounted || !expired) return;
+      final prefs = await SharedPreferences.getInstance();
+      final dismissed = prefs.getBool(_kTrialBannerDismissedPref) ?? false;
+      if (dismissed || !mounted) return;
+      setState(() => _showTrialExpiredBanner = true);
+    }
+  }
+
+  Future<void> _dismissTrialBanner() async {
+    setState(() => _showTrialExpiredBanner = false);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kTrialBannerDismissedPref, true);
+  }
+
+  Future<void> _refreshProAfterPaywall() async {
+    final isPro = await EntitlementService.instance.isPro();
+    if (!mounted || isPro == _isPro) return;
+    setState(() => _isPro = isPro);
+    if (isPro) {
+      _loadArticles(reset: true);
+    }
   }
 
   Future<void> _loadTopTags() async {
@@ -299,6 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
       offset: _offset,
       source: _selectedSource,
       tag: _tagFilter,
+      isPro: _isPro,
     );
 
     if (!mounted) return;
@@ -406,7 +445,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _openDigest() {
+  Future<void> _openDigest() async {
+    final isPro = await EntitlementService.instance.isPro();
+    if (!mounted) return;
+    if (!isPro) {
+      await PaywallSheet.show(context, reason: PaywallReason.briefing);
+      await _refreshProAfterPaywall();
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const DigestScreen()),
@@ -454,18 +500,25 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: isFeed ? _buildMobileAppBar() : null,
-        body: IndexedStack(
-          index: _bottomNavIndex,
+        body: Column(
           children: [
-            RefreshIndicator(
-              onRefresh: () => _loadArticles(reset: true),
-              color: kRed,
-              backgroundColor: _surface,
-              child: _buildMobileList(),
+            if (isFeed && _showTrialExpiredBanner) _buildTrialBanner(),
+            Expanded(
+              child: IndexedStack(
+                index: _bottomNavIndex,
+                children: [
+                  RefreshIndicator(
+                    onRefresh: () => _loadArticles(reset: true),
+                    color: kRed,
+                    backgroundColor: _surface,
+                    child: _buildMobileList(),
+                  ),
+                  const VersionsScreen(),
+                  const BookmarksScreen(),
+                  const AboutScreen(),
+                ],
+              ),
             ),
-            const VersionsScreen(),
-            const BookmarksScreen(),
-            const AboutScreen(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -802,7 +855,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final showLoader = _isLoading && !_isSearchMode;
-    final itemCount = _displayArticles.length + (showLoader ? 1 : 0);
+    final showFreeLimit = !_isSearchMode &&
+        !_isLoading &&
+        _repository.hasReachedFreeLimit &&
+        _displayArticles.isNotEmpty;
+    final itemCount = _displayArticles.length +
+        (showLoader ? 1 : 0) +
+        (showFreeLimit ? 1 : 0);
 
     return ListView.builder(
       controller: _scrollController,
@@ -810,6 +869,9 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: itemCount,
       itemBuilder: (context, index) {
         if (index >= _displayArticles.length) {
+          if (showFreeLimit && index == _displayArticles.length) {
+            return _buildFreeLimitTile();
+          }
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: _PollingIndicator(),
@@ -876,12 +938,136 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDesktop(BuildContext context) {
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          _buildLeftSidebar(),
-          Expanded(child: _buildDesktopMain()),
-          _buildRightSidebar(),
+          if (_showTrialExpiredBanner) _buildTrialBanner(),
+          Expanded(
+            child: Row(
+              children: [
+                _buildLeftSidebar(),
+                Expanded(child: _buildDesktopMain()),
+                _buildRightSidebar(),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTrialBanner() {
+    return Material(
+      color: kRed.withValues(alpha: _isDark ? 0.18 : 0.10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: kRed.withValues(alpha: 0.5))),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.lock_clock, size: 18, color: kRed),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Your trial has ended — subscribe to keep Pro features',
+                style: TextStyle(
+                  color: _textPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await PaywallSheet.show(context, reason: PaywallReason.briefing);
+                await _refreshProAfterPaywall();
+                if (!mounted) return;
+                if (_isPro) await _dismissTrialBanner();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: kRed,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'Subscribe',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+            ),
+            IconButton(
+              onPressed: _dismissTrialBanner,
+              icon: Icon(Icons.close, size: 18, color: _textSecondary),
+              tooltip: 'Dismiss',
+              splashRadius: 18,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFreeLimitTile() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: _surface2,
+          border: Border.all(color: _border),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.lock_outline, size: 22, color: kRed),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "You've reached the free limit",
+                    style: TextStyle(
+                      color: _textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Subscribe to Pro to load the full feed',
+                    style: TextStyle(color: _textSecondary, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed: () async {
+                await PaywallSheet.show(
+                  context,
+                  reason: PaywallReason.briefing,
+                );
+                await _refreshProAfterPaywall();
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: kRed,
+                side: const BorderSide(color: kRed),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                textStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              child: const Text('Upgrade'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1263,10 +1449,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final showLoader = _isLoading && !_isSearchMode;
-    final itemCount = _displayArticles.length + (showLoader ? 1 : 0);
+    final showFreeLimit = !_isSearchMode &&
+        !_isLoading &&
+        _repository.hasReachedFreeLimit &&
+        _displayArticles.isNotEmpty;
+    final listItemCount = _displayArticles.length +
+        (showLoader ? 1 : 0) +
+        (showFreeLimit ? 1 : 0);
+    final gridItemCount = _displayArticles.length + (showLoader ? 1 : 0);
 
     if (_viewMode == ViewMode.grid) {
-      return GridView.builder(
+      final grid = GridView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(20),
         clipBehavior: Clip.none,
@@ -1276,7 +1469,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: itemCount,
+        itemCount: gridItemCount,
         itemBuilder: (context, index) {
           if (index >= _displayArticles.length) {
             return const Center(child: _PollingIndicator());
@@ -1291,14 +1484,27 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       );
+      if (!showFreeLimit) return grid;
+      return Column(
+        children: [
+          Expanded(child: grid),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: _buildFreeLimitTile(),
+          ),
+        ],
+      );
     }
 
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(20),
-      itemCount: itemCount,
+      itemCount: listItemCount,
       itemBuilder: (context, index) {
         if (index >= _displayArticles.length) {
+          if (showFreeLimit && index == _displayArticles.length) {
+            return _buildFreeLimitTile();
+          }
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: _PollingIndicator()),

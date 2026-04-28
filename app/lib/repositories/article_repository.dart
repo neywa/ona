@@ -11,12 +11,27 @@ import '../models/ocp_version.dart';
 class ArticleRepository {
   final SupabaseClient _client = Supabase.instance.client;
 
+  bool _hasReachedFreeLimit = false;
+
+  /// True when a free-tier caller hit the page-2 wall on the most recent
+  /// [fetchArticles] call. Reset whenever a fresh `offset = 0` page is
+  /// fetched.
+  bool get hasReachedFreeLimit => _hasReachedFreeLimit;
+
   Future<List<Article>> fetchArticles({
     int limit = 50,
     int offset = 0,
     String? source,
     String? tag,
+    bool isPro = true,
   }) async {
+    if (offset > 0 && !isPro) {
+      _hasReachedFreeLimit = true;
+      return [];
+    }
+    if (offset == 0) {
+      _hasReachedFreeLimit = false;
+    }
     try {
       var query = _client.from('articles').select();
 

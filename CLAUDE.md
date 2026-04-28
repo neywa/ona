@@ -113,3 +113,7 @@ Never put the service-role key in `app/assets/.env` — that file ships inside t
 
 - [.github/workflows/scrape.yml](.github/workflows/scrape.yml) runs `python -m scraper.main` hourly (`0 * * * *`) and on `workflow_dispatch`. **Deps are listed inline in the workflow's `pip install` line, not pulled from `pyproject.toml`. Adding a scraper dependency means updating BOTH [scraper/pyproject.toml](scraper/pyproject.toml) AND that pip install line.**
 - [.github/workflows/deploy_web.yml](.github/workflows/deploy_web.yml) runs on every push to `main`: `flutter build web` with Supabase creds via `--dart-define`, then `peaceiris/actions-gh-pages` publishes `app/build/web` to the `gh-pages` branch (live at https://neywa.github.io/shiftfeed/, base href `/shiftfeed/`).
+
+## Supabase migrations
+
+SQL migration files live in `app/lib/sql/`. Run them manually in the Supabase dashboard SQL editor in phase order. They are not executed by the app.
