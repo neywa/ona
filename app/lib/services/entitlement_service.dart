@@ -11,10 +11,14 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Identifier of the single Pro entitlement configured in the RevenueCat
 /// dashboard.
 const String _kProEntitlementId = 'pro';
+
+/// SharedPreferences key for the debug-only PRO override flag.
+const String _kDevProOverridePref = 'dev_pro_override';
 
 /// Thrown when [Purchases.purchasePackage] is cancelled by the user.
 ///
@@ -58,8 +62,49 @@ class EntitlementService {
 
   bool _initialized = false;
 
+  /// Debug-only override that forces [isPro] to return true regardless
+  /// of RevenueCat. Persisted via [SharedPreferences] so the toggle
+  /// survives hot reload / cold start during local development.
+  bool _devProOverride = false;
+  bool _devProLoaded = false;
+
   bool get _supported =>
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  /// Lazy-loads the dev override flag from SharedPreferences on first
+  /// use. No-op outside debug builds — the flag is silently treated as
+  /// false in release so a stray value from a prior debug install can
+  /// never grant Pro in production.
+  Future<void> _ensureDevProLoaded() async {
+    if (_devProLoaded) return;
+    if (!kDebugMode) {
+      _devProLoaded = true;
+      return;
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _devProOverride = prefs.getBool(_kDevProOverridePref) ?? false;
+    } catch (e) {
+      debugPrint('[EntitlementService] dev override load failed: $e');
+      _devProOverride = false;
+    }
+    _devProLoaded = true;
+  }
+
+  /// Toggles the debug-only PRO override and persists it. No-op in
+  /// release builds. Returns the new value.
+  Future<bool> toggleDevProOverride() async {
+    if (!kDebugMode) return false;
+    await _ensureDevProLoaded();
+    _devProOverride = !_devProOverride;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_kDevProOverridePref, _devProOverride);
+    } catch (e) {
+      debugPrint('[EntitlementService] dev override persist failed: $e');
+    }
+    return _devProOverride;
+  }
 
   /// Initialises RevenueCat with the given platform [apiKey].
   ///
@@ -75,9 +120,15 @@ class EntitlementService {
   /// Returns true if the user currently has the `pro` entitlement active
   /// (covers both an active free trial and a paid subscription).
   ///
-  /// Returns false on web or on any error querying RevenueCat — callers
-  /// should treat false as "free tier" rather than "unknown".
+  /// In debug builds, the dev override (toggled via the long-press on
+  /// the app title) short-circuits to true. Returns false on web or on
+  /// any error querying RevenueCat — callers should treat false as
+  /// "free tier" rather than "unknown".
   Future<bool> isPro() async {
+    if (kDebugMode) {
+      await _ensureDevProLoaded();
+      if (_devProOverride) return true;
+    }
     if (!_supported) return false;
     try {
       final info = await Purchases.getCustomerInfo();

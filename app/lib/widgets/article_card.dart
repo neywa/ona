@@ -52,10 +52,27 @@ class ArticleCard extends StatelessWidget {
     return _kSecurityOrange;
   }
 
+  /// Brand-aligned accent for the left stripe when no severity / security
+  /// / release tag has overridden it. Falls back to [kRed] for unknown
+  /// sources (incl. user-defined custom RSS feeds), matching the rest of
+  /// the app's accent. Sources that always carry semantic tags
+  /// (`GitHub Releases`, `Red Hat Security`, `OCP Versions`) never reach
+  /// this method and so don't need entries here.
   Color _sourceAccentColor(String source) {
     switch (source) {
+      case 'Red Hat Blog':
+      case 'Red Hat Developer':
+        return kRed; // Red Hat brand red (matches kRed)
+      case 'Kubernetes Blog':
+        return const Color(0xFF326CE5); // Kubernetes brand blue
+      case 'CNCF Blog':
+        return const Color(0xFF1976D2); // CNCF brand blue
+      case 'Istio Blog':
+        return const Color(0xFF466BB0); // Istio brand blue
+      case 'Hacker News':
+        return const Color(0xFFFF6600); // HN/Y-Combinator orange
       case 'HackerNoon':
-        return const Color(0xFF00FF00);
+        return const Color(0xFF00CC00); // HackerNoon green
       default:
         return kRed;
     }

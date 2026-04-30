@@ -128,6 +128,25 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setBool(_kTrialBannerDismissedPref, true);
   }
 
+  /// Long-press handler on the app title — flips the debug-only PRO
+  /// override and re-reads `isPro` so paywall-gated UI lights up
+  /// immediately. Wired only when [kDebugMode] is true; release builds
+  /// pass `null` to the GestureDetector so the gesture is a no-op.
+  Future<void> _toggleDevPro() async {
+    if (!kDebugMode) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final newValue =
+        await EntitlementService.instance.toggleDevProOverride();
+    await _refreshProAfterPaywall();
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Dev PRO mode: ${newValue ? "ON" : "OFF"}'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   Future<void> _refreshProAfterPaywall() async {
     final isPro = await EntitlementService.instance.isPro();
     if (!mounted || isPro == _isPro) return;
@@ -562,13 +581,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppBar(
       automaticallyImplyLeading: false,
       titleSpacing: 16,
-      title: Text(
-        'ShiftFeed',
-        style: TextStyle(
-          color: _textPrimary,
-          fontSize: 22,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1.5,
+      title: GestureDetector(
+        onLongPress: kDebugMode ? _toggleDevPro : null,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Flexible + ellipsis so the title yields width to the PRO
+            // badge on narrow AppBar layouts instead of overflowing.
+            Flexible(
+              child: Text(
+                'ShiftFeed',
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: TextStyle(
+                  color: _textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
+              ),
+            ),
+            if (_isPro) ...[
+              const SizedBox(width: 8),
+              const _ProBadge(),
+            ],
+          ],
         ),
       ),
       actions: [
@@ -1083,15 +1121,29 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(24),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'ShiftFeed',
-                style: GoogleFonts.ibmPlexSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: _textPrimary,
-                ),
+            child: GestureDetector(
+              onLongPress: kDebugMode ? _toggleDevPro : null,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'ShiftFeed',
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: _textPrimary,
+                      ),
+                    ),
+                  ),
+                  if (_isPro) ...[
+                    const SizedBox(width: 8),
+                    const _ProBadge(),
+                  ],
+                ],
               ),
             ),
           ),
@@ -2097,6 +2149,33 @@ class _ToggleBtn extends StatelessWidget {
               color: selected ? kRed : secondary,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tiny red "PRO" pill rendered next to the app title when
+/// [EntitlementService.isPro] is true (including the debug-only
+/// override toggled by long-pressing the title).
+class _ProBadge extends StatelessWidget {
+  const _ProBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: kRed,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Text(
+        'PRO',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.8,
         ),
       ),
     );

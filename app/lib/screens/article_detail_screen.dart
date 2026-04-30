@@ -117,19 +117,26 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   }
 
   Widget _buildWebView() {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: WebViewWidget(controller: _controller!),
-        ),
-        if (_isLoading)
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: LinearProgressIndicator(),
+    // Wrap in SafeArea so the WebView's PlatformView doesn't paint under
+    // the Android system nav / gesture bar — Flutter's edge-to-edge
+    // default lets the Scaffold body extend behind it otherwise. AppBar
+    // handles the top inset already, so only bottom is needed here.
+    return SafeArea(
+      top: false,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: WebViewWidget(controller: _controller!),
           ),
-      ],
+          if (_isLoading)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(),
+            ),
+        ],
+      ),
     );
   }
 

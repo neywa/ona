@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/alert_rule_service.dart';
@@ -109,8 +110,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'v1.0.0',
+                  _AppVersionText(
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: onSurface.withValues(alpha: 0.6),
                     ),
@@ -305,6 +305,41 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 20),
         ],
       ),
+    );
+  }
+}
+
+/// Renders the app version label on the About card. Reads
+/// `package_info_plus` at runtime so the value tracks `pubspec.yaml`
+/// instead of being hand-edited per release.
+class _AppVersionText extends StatelessWidget {
+  final TextStyle? style;
+  const _AppVersionText({this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        // Plugin not registered (e.g. hot reload after adding the
+        // dependency, before a full rebuild), or any other failure —
+        // collapse the line rather than showing a stuck placeholder.
+        if (snapshot.hasError) {
+          debugPrint('[About] PackageInfo.fromPlatform failed: '
+              '${snapshot.error}');
+          return const SizedBox.shrink();
+        }
+        final raw = snapshot.data?.version;
+        if (raw == null) {
+          // Still loading. Reserve a line of vertical space so the
+          // layout doesn't jump when the version arrives.
+          return Text(' ', style: style);
+        }
+        // package_info_plus already separates `version` (semver) from
+        // `buildNumber`, but defensively split on '+' in case a future
+        // platform returns a combined string.
+        return Text('v${raw.split('+').first}', style: style);
+      },
     );
   }
 }
@@ -768,7 +803,8 @@ class _AlertRuleEditSheetState extends State<_AlertRuleEditSheet> {
         20,
         12,
         20,
-        20 + MediaQuery.of(context).viewInsets.bottom,
+        20 + MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -1166,7 +1202,8 @@ class _DigestScheduleSheetState extends State<_DigestScheduleSheet> {
         20,
         12,
         20,
-        20 + MediaQuery.of(context).viewInsets.bottom,
+        20 + MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -1571,7 +1608,8 @@ class _AddRssSourceSheetState extends State<_AddRssSourceSheet> {
         20,
         12,
         20,
-        20 + MediaQuery.of(context).viewInsets.bottom,
+        20 + MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
       ),
       child: SingleChildScrollView(
         child: Form(
