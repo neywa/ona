@@ -16,6 +16,23 @@ String _formatDate(DateTime d) {
   return '$day ${_monthAbbr[d.month - 1]} ${d.year}';
 }
 
+// OCP Versions scraper — single source of truth for OpenShift release
+// articles (see scraper/sources/ocp_versions.py).
+const String _kOcpVersionsSource = 'OCP Versions';
+final RegExp _kOcpPatchVersionPattern = RegExp(r'\b4\.\d+\.\d+\b');
+
+/// Returns the OpenShift Release Status dashboard URL for [article], or
+/// null if the article isn't from the OCP Versions scraper or no
+/// patch-level version (`4.X.Y`) appears in title/summary.
+String? _releaseStatusUrl(Article article) {
+  if (article.source != _kOcpVersionsSource) return null;
+  final haystack = '${article.title} ${article.summary ?? ''}';
+  final match = _kOcpPatchVersionPattern.firstMatch(haystack);
+  if (match == null) return null;
+  return 'https://openshift-release.apps.ci.l2s4.p1.openshiftapps.com'
+      '/releasestream/4-stable/release/${match.group(0)}';
+}
+
 class ArticleDetailScreen extends StatefulWidget {
   final Article article;
 
@@ -28,6 +45,10 @@ class ArticleDetailScreen extends StatefulWidget {
 class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
   bool _isLoading = true;
   WebViewController? _controller;
+
+  /// Computed once from [Article.title] + [Article.summary]. Non-null only
+  /// for OCP Versions articles where a patch version was extractable.
+  late final String? _releaseUrl = _releaseStatusUrl(widget.article);
 
   bool get _supportsWebView =>
       !kIsWeb &&
@@ -59,6 +80,12 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
     );
   }
 
+  Future<void> _openReleaseStatus() async {
+    final url = _releaseUrl;
+    if (url == null) return;
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -69,6 +96,12 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
           style: theme.textTheme.titleSmall,
         ),
         actions: [
+          if (_releaseUrl != null)
+            IconButton(
+              icon: const Icon(Icons.fact_check_outlined),
+              tooltip: 'Release Status',
+              onPressed: _openReleaseStatus,
+            ),
           IconButton(
             icon: const Icon(Icons.open_in_browser),
             onPressed: _openInBrowser,
@@ -211,6 +244,17 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
             ),
             onPressed: _openInBrowser,
           ),
+          if (_releaseUrl != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.fact_check_outlined),
+              label: const Text('Open Release Status'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: _openReleaseStatus,
+            ),
+          ],
         ],
       ),
     );

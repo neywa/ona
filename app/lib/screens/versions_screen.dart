@@ -335,20 +335,27 @@ class _VersionCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  InkWell(
-                    onTap: () => launchUrl(
-                      Uri.parse(
-                        'https://github.com/openshift/cincinnati-graph-data'
-                        '/blob/master/channels/stable-${version.minorVersion}.yaml',
+                  Tooltip(
+                    message: 'Open Release Status',
+                    child: InkWell(
+                      // Land users on the OpenShift Release Status
+                      // dashboard (build status + tests for the patch
+                      // release) rather than the raw cincinnati YAML.
+                      onTap: () => launchUrl(
+                        Uri.parse(
+                          'https://openshift-release.apps.ci.l2s4.p1'
+                          '.openshiftapps.com/releasestream/4-stable'
+                          '/release/${version.latestStable}',
+                        ),
+                        mode: LaunchMode.externalApplication,
                       ),
-                      mode: LaunchMode.externalApplication,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.open_in_new,
-                        size: 16,
-                        color: textMuted,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color: textMuted,
+                        ),
                       ),
                     ),
                   ),
