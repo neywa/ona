@@ -102176,8 +102176,8 @@ case 6:case 1:return B.t(q,r)
 case 2:return B.r(o.at(-1),r)}})
 return B.u($async$Ai,r)},
 anv(){this.R(new B.avs(this))},
-L(a){var s,r,q,p,o,n=this,m=null,l=B.z(a),k=l.ax.a===A.D,j=k?A.c_:A.cn,i=k?A.I:A.aI,h=k?A.ar:A.U,g=k?A.U:A.al,f=B.hg(k?A.aX:A.aS,1),e=B.bV(a,m,t.w).w,d=t.p,c=B.b([B.dW(B.bN(m,m,A.O,m,new B.c3(g.ec(0.4),m,m,B.bT(2),m,m,A.aw),4,A.us,m,40),m,m)],d)
-if(n.f===A.mG)c.push(n.abE(l,i,h,g))
+L(a){var s,r,q,p,o,n=this,m=null,l=B.z(a),k=l.ax.a===A.D,j=k?A.c_:A.cn,i=k?A.I:A.aI,h=k?A.ar:A.U,g=k?A.U:A.al,f=k?A.aX:A.aS,e=B.bV(a,m,t.w).w,d=B.hg(f,1),c=t.p,b=B.b([B.dW(B.bN(m,m,A.O,m,new B.c3(g.ec(0.4),m,m,B.bT(2),m,m,A.aw),4,A.us,m,40),m,m)],c)
+if(n.f===A.mG)b.push(n.abE(l,i,h,g))
 else{s=n.y
 r=B.e2("We sent a sign-in link to {email}. Tap it to continue \u2014 then come back here to complete your subscription.","{email}",s)
 s=B.dW(B.cl(A.TK,A.a8,m,64),m,m)
@@ -102187,12 +102187,12 @@ p=B.af("Check your inbox",m,m,m,p==null?m:p.rY(i,A.da),A.cM,m)
 q=q.z
 q=B.af(r,m,m,m,q==null?m:q.c7(h),A.cM,m)
 o=n.r?m:n.galk()
-d=B.b([A.dC,s,A.bE,p,A.c5,q,A.qO,B.kA(B.af("Resend link",m,m,m,B.aD(m,m,i,m,m,m,m,m,m,m,m,m,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),m,m),o,m)],d)
+c=B.b([A.dC,s,A.bE,p,A.c5,q,A.qO,B.kA(B.af("Resend link",m,m,m,B.aD(m,m,i,m,m,m,m,m,m,m,m,m,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),m,m),o,m)],c)
 s=n.x
-if(s!=null)d.push(new B.b4(A.uv,B.af(s,m,m,m,B.aD(m,m,g,m,m,m,m,m,m,m,m,11,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),A.cM,m),m))
+if(s!=null)c.push(new B.b4(A.uv,B.af(s,m,m,m,B.aD(m,m,g,m,m,m,m,m,m,m,m,11,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),A.cM,m),m))
 s=n.r?m:n.ganu()
-d.push(B.kA(B.af("Use a different email",m,m,m,B.aD(m,m,h,m,m,m,m,m,m,m,m,m,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),m,m),s,m))
-c.push(B.bM(d,A.cw,A.P,A.a2))}return B.bN(m,B.bM(c,A.cw,A.P,A.be),A.O,m,new B.c3(j,m,f,A.t_,m,m,A.aw),m,m,new B.ag(20,12,20,20+e.f.d),m)},
+c.push(B.kA(B.af("Use a different email",m,m,m,B.aD(m,m,h,m,m,m,m,m,m,m,m,m,m,m,m,m,m,!0,m,m,m,m,m,m,m,m),m,m),s,m))
+b.push(B.bM(c,A.cw,A.P,A.a2))}return B.bN(m,B.bM(b,A.cw,A.P,A.be),A.O,m,new B.c3(j,m,d,A.t_,m,m,A.aw),m,m,new B.ag(20,12,20,20+e.f.d+e.r.d),m)},
 abE(a,b,c,d){var s,r,q=this,p=null,o=a.ok,n=o.r
 n=B.af("Create your ShiftFeed account",p,p,p,n==null?p:n.rY(b,A.da),p,p)
 o=o.z
