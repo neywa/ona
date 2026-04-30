@@ -183,17 +183,22 @@ class _AuthSheetState extends State<AuthSheet> {
     final textMuted = isDark ? kTextMuted : kLightTextMuted;
     final border = isDark ? kBorder : kLightBorder;
 
+    final media = MediaQuery.of(context);
     return Container(
       decoration: BoxDecoration(
         color: surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         border: Border.all(color: border),
       ),
+      // `padding.bottom` is 0 inside a fully-working SafeArea, but
+      // gesture-nav Androids sometimes leave a small system inset that
+      // useSafeArea: true doesn't catch — adding it here keeps the last
+      // text button clear of the bottom control bar.
       padding: EdgeInsets.fromLTRB(
         20,
         12,
         20,
-        20 + MediaQuery.of(context).viewInsets.bottom,
+        20 + media.viewInsets.bottom + media.padding.bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

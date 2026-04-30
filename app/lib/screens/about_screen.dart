@@ -515,7 +515,9 @@ class _AlertRulesSectionState extends State<_AlertRulesSection> {
   }
 
   void _refreshProCheck() {
-    setState(() => _proCheck = EntitlementService.instance.isPro());
+    setState(() {
+      _proCheck = EntitlementService.instance.isPro();
+    });
   }
 
   Future<void> _showPaywall() async {
@@ -925,13 +927,17 @@ class _DigestScheduleSectionState extends State<_DigestScheduleSection> {
   }
 
   void _refreshPrefs() {
-    setState(() => _prefsFuture = DigestPrefService.instance.getPrefs());
+    setState(() {
+      _prefsFuture = DigestPrefService.instance.getPrefs();
+    });
   }
 
   Future<void> _showPaywall() async {
     await PaywallSheet.show(context, reason: PaywallReason.briefing);
     if (!mounted) return;
-    setState(() => _proCheck = EntitlementService.instance.isPro());
+    setState(() {
+      _proCheck = EntitlementService.instance.isPro();
+    });
   }
 
   Future<void> _openSheet(DigestPrefs prefs) async {
@@ -1309,7 +1315,9 @@ class _CustomFeedsSectionState extends State<_CustomFeedsSection> {
   Future<void> _showPaywall() async {
     await PaywallSheet.show(context, reason: PaywallReason.briefing);
     if (!mounted) return;
-    setState(() => _proCheck = EntitlementService.instance.isPro());
+    setState(() {
+      _proCheck = EntitlementService.instance.isPro();
+    });
   }
 
   Future<void> _confirmDelete(CustomRssSource source) async {
