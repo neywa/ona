@@ -172,10 +172,10 @@ class ArticleRepository {
 
   Future<List<OcpVersion>> fetchOcpVersions() async {
     try {
-      final response = await _client
-          .from('ocp_versions')
-          .select()
-          .order('minor_version', ascending: false);
+      // No server-side ORDER BY — `minor_version` is a TEXT column so
+      // lex sort puts '4.9' before '4.18'. Both call sites (versions
+      // screen, home sidebar) re-sort numerically by `minorInt` anyway.
+      final response = await _client.from('ocp_versions').select();
       return (response as List)
           .map((row) => OcpVersion.fromJson(row as Map<String, dynamic>))
           .toList();
@@ -249,11 +249,13 @@ class ArticleRepository {
     const noise = {
       'blog', 'community', 'hackernoon', 'reddit',
       'stable-channel', 'rhsa', 'rhba', 'advisory',
-      'ocp-4.14', 'ocp-4.15', 'ocp-4.16', 'ocp-4.17',
-      'ocp-4.18', 'ocp-4.19', 'ocp-4.20', 'ocp-4.21',
     };
-    if (tag.toUpperCase().startsWith('CVE-')) return true;
-    return noise.contains(tag.toLowerCase());
+    final lower = tag.toLowerCase();
+    if (lower.startsWith('cve-')) return true;
+    // Filter every per-minor OCP version tag (`ocp-4.14`, `ocp-4.22`, …)
+    // — they're emitted on every OCP article and would dominate Top Tags.
+    if (lower.startsWith('ocp-4.')) return true;
+    return noise.contains(lower);
   }
 
   static final Uri _scrapeRunsUrl = Uri.parse(
