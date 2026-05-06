@@ -50,15 +50,19 @@ class UserService {
   /// Sends a passwordless magic-link email to [email].
   ///
   /// On native platforms the email links back to [_kAuthRedirectUrl] which
-  /// is intercepted by the deep-link handler in `main.dart`. On web the
-  /// browser handles the redirect automatically.
+  /// is intercepted by the deep-link handler in `main.dart`. On web we
+  /// pass the current page URL explicitly so the redirect does not depend
+  /// on the Supabase dashboard's "Site URL" fallback (which has bitten us
+  /// when its path component was silently dropped).
   ///
   /// Throws [AuthException] on failure — callers should display the
   /// `AuthException.message` to the user.
   Future<void> sendMagicLink(String email) async {
     await _auth.signInWithOtp(
       email: email,
-      emailRedirectTo: kIsWeb ? null : _kAuthRedirectUrl,
+      emailRedirectTo: kIsWeb
+          ? '${Uri.base.origin}${Uri.base.path}'
+          : _kAuthRedirectUrl,
     );
   }
 
