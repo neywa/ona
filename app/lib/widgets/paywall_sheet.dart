@@ -81,6 +81,44 @@ enum _PlanChoice { monthly, annual }
 class _PaywallSheetState extends State<PaywallSheet> {
   _PlanChoice _plan = _PlanChoice.annual;
   bool _busy = false;
+  Offering? _offering;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOfferings();
+  }
+
+  Future<void> _loadOfferings() async {
+    final offerings = await EntitlementService.instance.getOfferings();
+    if (!mounted) return;
+    setState(() => _offering = offerings?.current);
+  }
+
+  Package? _packageFor(_PlanChoice choice) {
+    final offering = _offering;
+    if (offering == null) return null;
+    final wanted = choice == _PlanChoice.annual
+        ? PackageType.annual
+        : PackageType.monthly;
+    for (final p in offering.availablePackages) {
+      if (p.packageType == wanted) return p;
+    }
+    return null;
+  }
+
+  /// Store-localised price for [choice], falling back to the hardcoded
+  /// USD strings while offerings are still loading or if RevenueCat fails.
+  String _priceFor(_PlanChoice choice) {
+    final pkg = _packageFor(choice);
+    if (pkg != null) {
+      final unit = choice == _PlanChoice.annual ? 'year' : 'month';
+      return '${pkg.storeProduct.priceString} / $unit';
+    }
+    return choice == _PlanChoice.annual
+        ? PaywallSheet._kPriceAnnual
+        : PaywallSheet._kPriceMonthly;
+  }
 
   String get _reasonTagline {
     switch (widget.reason) {
@@ -104,8 +142,8 @@ class _PaywallSheetState extends State<PaywallSheet> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      final offerings = await EntitlementService.instance.getOfferings();
-      final current = offerings?.current;
+      final current = _offering ??
+          (await EntitlementService.instance.getOfferings())?.current;
       final pkg = _selectPackage(current);
       if (pkg == null) {
         if (!mounted) return;
@@ -138,7 +176,8 @@ class _PaywallSheetState extends State<PaywallSheet> {
     try {
       final info = await EntitlementService.instance.restorePurchases();
       if (!mounted) return;
-      final hasPro = info.entitlements.active.containsKey('pro');
+      final hasPro =
+          info.entitlements.active.containsKey('shiftfed-pro-entitlement');
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -353,7 +392,7 @@ class _PaywallSheetState extends State<PaywallSheet> {
           child: _planTile(
             choice: _PlanChoice.monthly,
             label: PaywallSheet._kPlanMonthlyLabel,
-            price: PaywallSheet._kPriceMonthly,
+            price: _priceFor(_PlanChoice.monthly),
             badge: null,
             textPrimary: textPrimary,
             textSecondary: textSecondary,
@@ -366,7 +405,7 @@ class _PaywallSheetState extends State<PaywallSheet> {
           child: _planTile(
             choice: _PlanChoice.annual,
             label: PaywallSheet._kPlanAnnualLabel,
-            price: PaywallSheet._kPriceAnnual,
+            price: _priceFor(_PlanChoice.annual),
             badge: PaywallSheet._kSavingsBadge,
             textPrimary: textPrimary,
             textSecondary: textSecondary,

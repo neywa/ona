@@ -1,5 +1,5 @@
 /// Thin wrapper around RevenueCat's [Purchases] SDK that exposes a single
-/// `pro` entitlement check and surfaces purchase/restore errors as a sealed
+/// Pro entitlement check and surfaces purchase/restore errors as a sealed
 /// [EntitlementException] hierarchy.
 ///
 /// Web is unsupported — [init] is a no-op there and [isPro] always returns
@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Identifier of the single Pro entitlement configured in the RevenueCat
 /// dashboard.
-const String _kProEntitlementId = 'pro';
+const String _kProEntitlementId = 'shiftfed-pro-entitlement';
 
 /// SharedPreferences key for the debug-only PRO override flag.
 const String _kDevProOverridePref = 'dev_pro_override';
