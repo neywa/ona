@@ -7,6 +7,7 @@
 /// brand red used as the accent.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -58,11 +59,15 @@ class PaywallSheet extends StatefulWidget {
       'Get alerted the moment a critical CVE drops.';
   static const String _kReasonSync = 'Your bookmarks, everywhere you are.';
 
-  /// Shows the paywall as a modal bottom sheet.
+  /// Shows the paywall as a modal bottom sheet. No-op on web — the SDK
+  /// short-circuits Pro to false there and the magic-link auth flow is
+  /// not currently functional on web, so the paywall has nothing to
+  /// offer.
   static Future<void> show(
     BuildContext context, {
     required PaywallReason reason,
   }) {
+    if (kIsWeb) return Future<void>.value();
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

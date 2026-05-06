@@ -356,7 +356,10 @@ class _HomeScreenState extends State<HomeScreen> {
       offset: _offset,
       source: _selectedSource,
       tag: _tagFilter,
-      isPro: _isPro,
+      // Web has no paywall path; treat web users as unlimited so the
+      // free-limit tile (which prompts a paywall that won't render) does
+      // not appear.
+      isPro: _isPro || kIsWeb,
     );
 
     if (!mounted) return;
@@ -467,7 +470,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openDigest() async {
     final isPro = await EntitlementService.instance.isPro();
     if (!mounted) return;
-    if (!isPro) {
+    // On web there is no functional paywall and Pro is unattainable;
+    // the curated daily briefing is otherwise free content, so just let
+    // web users through to the digest screen.
+    if (!isPro && !kIsWeb) {
       await PaywallSheet.show(context, reason: PaywallReason.briefing);
       await _refreshProAfterPaywall();
       return;

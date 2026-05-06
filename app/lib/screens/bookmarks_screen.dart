@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -244,6 +245,7 @@ class _ExportAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) return const SizedBox.shrink();
     return FutureBuilder<bool>(
       future: EntitlementService.instance.isPro(),
       builder: (context, snap) {
@@ -299,6 +301,7 @@ class _UpsellBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) return const SizedBox.shrink();
     return FutureBuilder<bool>(
       future: EntitlementService.instance.isPro(),
       builder: (context, snap) {

@@ -129,14 +129,16 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          sectionTitle('Account'),
-          Card(
-            elevation: 0,
-            shape: cardShape,
-            clipBehavior: Clip.antiAlias,
-            child: const _AccountSection(),
-          ),
-          const SizedBox(height: 16),
+          if (!kIsWeb) ...[
+            sectionTitle('Account'),
+            Card(
+              elevation: 0,
+              shape: cardShape,
+              clipBehavior: Clip.antiAlias,
+              child: const _AccountSection(),
+            ),
+            const SizedBox(height: 16),
+          ],
           Card(
             elevation: 0,
             shape: cardShape,
