@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShiftFeed – Beta testovací plán (Golden Gate)</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --ink: #1c1a17;
+      --muted: #6b6560;
+      --accent: #EE0000;
+      --border: #e2ddd7;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.75;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; }
+
+    header {
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+
+    .app-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3em 0.85em;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+    }
+
+    .meta { color: var(--muted); font-size: 0.875rem; }
+
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.8em;
+      height: 1.8em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    h3:first-of-type { margin-top: 0.5rem; }
+
+    p { color: var(--ink); margin-bottom: 0.75rem; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    li { margin-bottom: 0.3rem; color: var(--ink); }
+
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+    a:hover { border-bottom-color: var(--accent); }
+
+    .highlight {
+      background: #fff0f0;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1rem;
+      margin: 0.75rem 0;
+      font-size: 0.925rem;
+    }
+
+    .toc { list-style: none; padding: 0; }
+    .toc li { margin-bottom: 0.4rem; }
+    .toc a {
+      font-size: 0.9rem;
+      color: var(--ink);
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .toc a:hover { color: var(--accent); }
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.6em;
+      height: 1.6em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .test-case {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .test-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-checkbox {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .test-id {
+      font-family: 'DM Sans', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15em 0.5em;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .test-title {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .badges { display: flex; gap: 0.35rem; flex-wrap: wrap; margin: 0.5rem 0 0.65rem 2.55rem; }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15em 0.6em;
+      border-radius: 99px;
+      border: 1px solid;
+    }
+
+    .badge-free { background: #f0f7ee; border-color: #9ac989; color: #3b6d11; }
+    .badge-pro { background: #eeedfe; border-color: #afa9ec; color: #3c3489; }
+    .badge-android { background: #e8f5e9; border-color: #81c784; color: #1b5e20; }
+    .badge-ios { background: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
+    .badge-native { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
+
+    .test-body { margin-left: 2.55rem; font-size: 0.9rem; }
+    .test-body .label { font-weight: 500; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; margin-bottom: 0.2rem; }
+    .test-body ol { padding-left: 1.25rem; margin-bottom: 0.5rem; }
+    .test-body ol li { margin-bottom: 0.2rem; }
+    .expected { background: #f0f7ee; border-left: 2px solid #9ac989; border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #2d4a26; margin-top: 0.35rem; }
+
+    .back-to-top { text-align: right; margin-top: 1.25rem; }
+    .back-to-top a { font-size: 0.8rem; color: var(--muted); }
+
+    .signoff-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 0.75rem; }
+    .signoff-table th { text-align: left; font-weight: 500; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 0.5rem 0.75rem; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .signoff-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--ink); }
+    .signoff-table td.write { background: #fffcf9; min-width: 100px; }
+    .signoff-table tr:last-child td { border-bottom: none; }
+
+    .contact-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 540px) {
+      section { padding: 1.25rem 1rem; }
+      .test-case { padding: 0.85rem 1rem; }
+      .test-body { margin-left: 0; }
+      .badges { margin-left: 0; }
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; font-size: 14px; }
+      section { box-shadow: none; break-inside: avoid; }
+      .test-case { break-inside: avoid; }
+      a { color: var(--ink); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header id="top">
+    <div class="app-badge">ShiftFeed · Golden Gate</div>
+    <h1>Beta testovací plán</h1>
+    <p class="meta">Datum vydání: 7. května 2026 &nbsp;·&nbsp; Pouze mobilní aplikace (Android + iOS) &nbsp;·&nbsp; ~45 minut</p>
+  </header>
+
+  <!-- SHRNUTÍ -->
+  <section>
+    <h2><span class="num">★</span> Co testujete</h2>
+    <p>ShiftFeed je agregátor zpráv o OpenShiftu a Kubernetes pro SRE, DevOps inženýry a platform inženýry. Stahuje články z Red Hat Blogu, Kubernetes Blogu, CNCF, HackerNoon a Hacker News, sleduje stabilní vydání OCP, zobrazuje Red Hat CVE a generuje denní AI přehled.</p>
+    <div class="highlight"><strong>Rozsah tohoto kola:</strong> mobilní aplikace na Androidu a iOS. Netestujte webovou verzi na neywa.github.io/shiftfeed — ta je samostatný cíl a není součástí tohoto kola.</div>
+    <p>Testovací plán je rozdělen na funkce Free a Pro. Kompletní Free průchod zvládnete přibližně za 30 minut. Testování Pro funkcí vyžaduje propagační oprávnění — viz část 2 pro nastavení.</p>
+  </section>
+
+  <!-- OBSAH -->
+  <section>
+    <h2><span class="num">☰</span> Obsah</h2>
+    <ul class="toc">
+      <li><a href="#env"><span class="toc-num">1</span> Nastavení prostředí</a></li>
+      <li><a href="#pro-setup"><span class="toc-num">2</span> Nastavení Pro úrovně</a></li>
+      <li><a href="#reporting"><span class="toc-num">3</span> Jak nahlásit chybu</a></li>
+      <li><a href="#feed"><span class="toc-num">4</span> Přehled a procházení článků</a></li>
+      <li><a href="#search"><span class="toc-num">5</span> Vyhledávání</a></li>
+      <li><a href="#bookmarks"><span class="toc-num">6</span> Záložky</a></li>
+      <li><a href="#briefing"><span class="toc-num">7</span> Denní AI přehled</a></li>
+      <li><a href="#ocp"><span class="toc-num">8</span> Verze OCP a CVE upozornění</a></li>
+      <li><a href="#submit"><span class="toc-num">9</span> Odeslání odkazu</a></li>
+      <li><a href="#auth"><span class="toc-num">10</span> Přihlášení (magic link)</a></li>
+      <li><a href="#notifications"><span class="toc-num">11</span> Push notifikace</a></li>
+      <li><a href="#rss"><span class="toc-num">12</span> Vlastní RSS zdroje</a></li>
+      <li><a href="#paywall"><span class="toc-num">13</span> Předplatné a oprávnění</a></li>
+      <li><a href="#theme"><span class="toc-num">14</span> Vzhled a vizuální design</a></li>
+      <li><a href="#settings"><span class="toc-num">15</span> Obrazovka Nastavení</a></li>
+      <li><a href="#edge"><span class="toc-num">16</span> Hraniční případy a regrese</a></li>
+      <li><a href="#signoff"><span class="toc-num">17</span> Závěrečné zhodnocení</a></li>
+    </ul>
+  </section>
+
+  <!-- SEKCE 1: PROSTŘEDÍ -->
+  <section id="env">
+    <h2><span class="num">1</span> Nastavení prostředí</h2>
+
+    <h3>Android</h3>
+    <ol>
+      <li>Nainstalujte sestavení z interního testování Play Store pomocí odkazu zaslaného vývojářem.</li>
+      <li>Minimální podporovaná verze: Android 7.0 (API 24). Ideálně testujte na Androidu 13+ kvůli chování push notifikací.</li>
+      <li>Poznamenejte si verzi aplikace — najdete ji úplně dole na obrazovce Nastavení.</li>
+      <li>Potvrďte, že máte dostupné Wi-Fi nebo mobilní data. Aplikace funguje bez připojení degradovaně, ale většina funkcí připojení vyžaduje.</li>
+    </ol>
+
+    <h3>iOS</h3>
+    <ol>
+      <li>Přijměte pozvánku do TestFlight zaslanou vývojářem a nainstalujte přes TestFlight.</li>
+      <li>Minimální podporovaná verze: iOS 13.</li>
+      <li>Poznamenejte si verzi aplikace z aplikace TestFlight nebo z Nastavení v ShiftFeed.</li>
+      <li>Potvrďte dostupnost sítě stejně jako výše.</li>
+    </ol>
+
+    <div class="highlight">Webová a desktopová verze jsou v tomto kole <strong>mimo rozsah testování</strong>. Pokud otevřete neywa.github.io/shiftfeed v prohlížeči, prosím nenahlašujte chyby — to je samostatná větev vydání.</div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 2: PRO NASTAVENÍ -->
+  <section id="pro-setup">
+    <h2><span class="num">2</span> Nastavení Pro úrovně</h2>
+    <p>Tuto sekci přeskočte, pokud testujete pouze Free funkce. Vraťte se sem, až dojdete k testovacímu případu označenému Pro.</p>
+    <ol>
+      <li>Otevřete ShiftFeed → klepněte na Nastavení (ikona ozubeného kola).</li>
+      <li>Přejděte na Účet → Přihlásit se → zadejte e-mail → klepněte na „Odeslat přihlašovací odkaz".</li>
+      <li>Otevřete e-mail s magic linkem na stejném zařízení → klepněte na odkaz → ShiftFeed se otevře a jste přihlášeni.</li>
+      <li>Zpět v Nastavení se přesuňte úplně dolů → klepněte na <strong>Kopírovat RevenueCat ID</strong>.</li>
+      <li>Odešlete toto ID vývojáři e-mailem nebo přes Slack. Vývojář vám z RevenueCat dashboardu přidělí propagační Pro oprávnění.</li>
+      <li>Po potvrzení zcela restartujte aplikaci (přejeďte ji z přepínače aplikací a znovu spusťte).</li>
+      <li>V horní liště aplikace by se měl zobrazit odznak <strong>PRO</strong> vedle nápisu „ShiftFeed".</li>
+      <li>V Nastavení by sekce Notifikace, Pravidla upozornění, Denní přehled a Vlastní zdroje měly zobrazovat skutečný obsah místo výzev k upgradu.</li>
+    </ol>
+    <div class="highlight">Pokud se odznak PRO po restartu neobjeví, klepněte na Nastavení → přesuňte se dolů → „Obnovit nákupy" a zkuste znovu.</div>
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 3: HLÁŠENÍ CHYB -->
+  <section id="reporting">
+    <h2><span class="num">3</span> Jak nahlásit chybu</h2>
+    <p>Pro každý nalezený problém prosím uveďte:</p>
+    <ul>
+      <li><strong>ID testu</strong> — např. T-FEED-03</li>
+      <li><strong>Model zařízení a verze OS</strong> — např. Samsung Galaxy S23 Ultra, Android 16</li>
+      <li><strong>Verze aplikace</strong> — z dolní části obrazovky Nastavení</li>
+      <li><strong>Kroky k reprodukci</strong> — co jste udělali, v jakém pořadí</li>
+      <li><strong>Očekávané vs. skutečné chování</strong> — co se mělo stát a co se stalo</li>
+      <li><strong>Screenshot nebo záznam obrazovky</strong> — pokud je to možné, přiložte</li>
+    </ul>
+    <div class="contact-box">
+      <span style="font-size:1.25rem;">✉</span>
+      <div>Hlášení chyb zasílejte na: <a href="mailto:bobek.roman@gmail.com">bobek.roman@gmail.com</a> nebo přes Slack dle dohody s vývojářem.</div>
+    </div>
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 4: PŘEHLED -->
+  <section id="feed">
+    <h2><span class="num">4</span> Přehled a procházení článků</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-01</span>
+        <div class="test-title">Aplikace se spustí bez pádu a zobrazí přehled</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Spusťte ShiftFeed ze studena z domovské obrazovky.</li>
+          <li>Počkejte na načtení přehledu.</li>
+          <li>Táhněte dolů pro obnovení.</li>
+        </ol>
+        <div class="expected">✓ Aplikace se otevře bez pádu. Přehled načte aktuální články z více zdrojů. Obnovení táhnutím stáhne nové položky a zobrazí indikátor načítání.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-02</span>
+        <div class="test-title">Přepínání mezi mřížkovým a seznamovým zobrazením</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>V horní liště aplikace klepněte na ikonu přepínání mřížka/seznam.</li>
+          <li>Přepněte mezi mřížkou a seznamem.</li>
+          <li>Aplikaci přesuňte na pozadí a vraťte se.</li>
+        </ol>
+        <div class="expected">✓ Rozložení se okamžitě změní mezi kompaktním seznamem a kartovým zobrazením. Zvolené rozložení se zachová po návratu do aplikace.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-03</span>
+        <div class="test-title">Filtrovací čipy podle zdroje</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Pod horní lištou klepněte na čip zdroje (např. „Red Hat Blog").</li>
+          <li>Sledujte přehled.</li>
+          <li>Klepněte na čip znovu nebo na „VŠE" pro zrušení filtru.</li>
+        </ol>
+        <div class="expected">✓ Přehled se filtruje tak, aby zobrazoval pouze články z vybraného zdroje. Zrušení filtru vrátí celý přehled. Vybraný čip má výrazný vzhled.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-04</span>
+        <div class="test-title">Filtr podle štítku z karty článku</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Najděte kartu článku se štítky (např. #security, #kubernetes).</li>
+          <li>Klepněte na jeden ze štítků.</li>
+        </ol>
+        <div class="expected">✓ Přehled se filtruje na články s daným štítkem. Vyhledávací lišta se vyplní hodnotou #nazevstitku zobrazující aktivní filtr.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-05</span>
+        <div class="test-title">Nekonečné rolování a limit Free úrovně</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Plynule rolujte přehledem dolů.</li>
+          <li>Pokračujte za počátečních 30 článků.</li>
+          <li>Rolujte dál, dokud se nenačítají žádné další články.</li>
+        </ol>
+        <div class="expected">✓ Nové články se načítají automaticky při přiblížení ke konci. Po přibližně 50 článcích se zobrazí dlaždice s limitem Free. Klepnutím na tlačítko upgradu na ní se otevře platební obrazovka.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-06</span>
+        <div class="test-title">Klepnutí na článek otevře správný cíl</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na běžný blogový článek (např. z Red Hat Blog nebo Kubernetes Blog).</li>
+          <li>Pak klepněte na CVE článek (označený #cve).</li>
+          <li>Pak klepněte na článek o vydání z GitHubu.</li>
+        </ol>
+        <div class="expected">✓ Blogové články se otevírají v integrovaném WebView s názvem zdroje v liště a ikonou externího odkazu. CVE a články o vydáních se otevírají ve WebView. Vše se načte do několika sekund s indikátorem průběhu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-07</span>
+        <div class="test-title">Vizuální design karet — barevné akcenty a metadata</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Procházejte přehledem a vizuálně zkontrolujte několik karet z různých zdrojů.</li>
+          <li>Prohlédněte si barevný pruh na levém okraji, favicon zdroje, relativní čas a štítky.</li>
+        </ol>
+        <div class="expected">✓ Každá karta má barevný levý pruh (červený pro Red Hat, zelený pro vydání, oranžový pro CVE, jasně zelený pro HackerNoon). Favicon zdroje je viditelný. Relativní čas se zobrazuje správně („2h ago"). Štítky jsou v tlumené šedé, kromě CVE (oranžová) a vydání (zelená).</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 5: VYHLEDÁVÁNÍ -->
+  <section id="search">
+    <h2><span class="num">5</span> Vyhledávání</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-01</span>
+        <div class="test-title">Vyhledávací lišta se otevírá a zavírá</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na ikonu lupy v horní liště aplikace.</li>
+          <li>Sledujte změnu rozložení.</li>
+          <li>Klepněte na šipku zpět nebo použijte gesto zpět na Androidu.</li>
+        </ol>
+        <div class="expected">✓ Název v liště nahradí textové pole s automatickým zaměřením — klávesnice se okamžitě zobrazí. Klepnutím zpět se ukončí režim vyhledávání a vrátí normální přehled.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-02</span>
+        <div class="test-title">Klíčové slovo vrátí výsledky z celé databáze</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete vyhledávání a napište „openshift" (počkejte ~400 ms na debounce).</li>
+          <li>Prohlédněte výsledky.</li>
+          <li>Smažte a zkuste „gateway api".</li>
+        </ol>
+        <div class="expected">✓ Výsledky se zobrazí z celé databáze (nejen z aktuálně načtené stránky). Výsledky jsou relevantní k zadanému klíčovému slovu. V podtitulku se zobrazí počet výsledků.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-03</span>
+        <div class="test-title">Vyhledávání podle štítku s prefixem #</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete vyhledávání a napište „#kubernetes".</li>
+          <li>Pak zkuste „#cve".</li>
+          <li>Pak zkuste „#release".</li>
+        </ol>
+        <div class="expected">✓ Výsledky se filtrují na články označené daným štítkem. „#cve" vrátí pouze bezpečnostní upozornění. „#release" pouze oznámení o vydáních.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-04</span>
+        <div class="test-title">Prázdný stav vyhledávání</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete vyhledávání a napište „xyzneexistujiciterm".</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se přátelský prázdný stav s ikonou a zprávou „Žádné výsledky pro…". Tlačítko „Vymazat vyhledávání" je viditelné a funkční.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 6: ZÁLOŽKY -->
+  <section id="bookmarks">
+    <h2><span class="num">6</span> Záložky</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-01</span>
+        <div class="test-title">Uložení a zrušení záložky</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Najděte libovolnou kartu článku v přehledu.</li>
+          <li>Klepněte na ikonu záložky na kartě.</li>
+          <li>Klepněte na ni znovu.</li>
+        </ol>
+        <div class="expected">✓ SnackBar potvrdí „Článek uložen". Ikona záložky se vyplní (plná). Opětovným klepnutím se zobrazí „Záložka odebrána" a ikona se vrátí do obrysového stavu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-02</span>
+        <div class="test-title">Obrazovka Uložené zobrazuje záložky a otevírá články</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přidejte záložku ke dvěma článkům z přehledu.</li>
+          <li>Klepněte na záložku Uložené v dolní navigaci.</li>
+          <li>Klepněte na jeden ze záložkovaných článků.</li>
+        </ol>
+        <div class="expected">✓ Oba uložené články se zobrazí na obrazovce Uložené. Klepnutím na jeden se článek otevře (prohlížeč nebo WebView dle typu).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-03</span>
+        <div class="test-title">Potažením smazat záložku</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Na obrazovce Uložené přejeďte kartu záložky doleva.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se červený indikátor smazání. Po dokončení přejetí se záložka odstraní ze seznamu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-04</span>
+        <div class="test-title">Vymazat všechny záložky</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>S alespoň dvěma uloženými záložkami otevřete obrazovku Uložené.</li>
+          <li>Klepněte na ikonu smazání/zametání v horní liště.</li>
+          <li>Potvrďte dialog.</li>
+        </ol>
+        <div class="expected">✓ Před vymazáním se zobrazí potvrzovací dialog. Po potvrzení jsou všechny záložky odstraněny a zobrazí se ilustrace prázdného stavu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-05</span>
+        <div class="test-title">Indikátor cloudové synchronizace (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Přihlášeni s Pro oprávněním.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete obrazovku Uložené.</li>
+          <li>Podívejte se na oblast nadpisu obrazovky.</li>
+        </ol>
+        <div class="expected">✓ Vedle nadpisu „Uložené" se zobrazí ikona cloudu, která signalizuje synchronizaci záložek do cloudu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-06</span>
+        <div class="test-title">Synchronizace záložek napříč zařízeními (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Přístup ke dvěma zařízením přihlášeným ke stejnému účtu s Pro.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přidejte záložku ke třem článkům na Zařízení A.</li>
+          <li>Otevřete obrazovku Uložené na Zařízení B.</li>
+        </ol>
+        <div class="expected">✓ Stejné záložky se na Zařízení B zobrazí do několika sekund bez jakékoli ruční synchronizace.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-07</span>
+        <div class="test-title">Export záložek (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Na obrazovce Uložené klepněte na ikonu exportu v horní liště.</li>
+          <li>Zvolte Markdown nebo PDF.</li>
+        </ol>
+        <div class="expected">✓ Otevře se systémový panel sdílení s vygenerovaným souborem. Soubor obsahuje záložkované články s názvy a URL adresami.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-08</span>
+        <div class="test-title">Odhlášení vrátí záložky na lokální úložiště (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Zatímco jste přihlášeni s Pro, odhlaste se (Nastavení → Účet → Odhlásit se).</li>
+          <li>Otevřete obrazovku Uložené.</li>
+        </ol>
+        <div class="expected">✓ Ikona cloudu zmizí. Záložky zůstanou viditelné (uloženy lokálně). Zobrazí se banner „Upgradujte na Pro pro synchronizaci záložek".</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-09</span>
+        <div class="test-title">Výzva k upgradu pro Free uživatele</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Bez přihlášení nebo s účtem bez Pro otevřete obrazovku Uložené.</li>
+        </ol>
+        <div class="expected">✓ Nad seznamem záložek se zobrazí banner „Upgradujte na Pro pro synchronizaci záložek". Klepnutím na Upgradovat se otevře platební obrazovka.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 7: AI PŘEHLED -->
+  <section id="briefing">
+    <h2><span class="num">7</span> Denní AI přehled</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-01</span>
+        <div class="test-title">Přístup k přehledu — Free vs Pro brána</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na ikonu jiskřičky (✨) v horní liště při Free účtu.</li>
+          <li>Opakujte po přihlášení s Pro.</li>
+        </ol>
+        <div class="expected">✓ Free: zobrazí se platební obrazovka. Pro: otevře se obrazovka s přehledem zobrazující nejnovější AI briefing.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-02</span>
+        <div class="test-title">Obsah a formátování přehledu (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete obrazovku přehledu jako Pro uživatel.</li>
+          <li>Přečtěte si obsah.</li>
+          <li>Klepněte na odkaz článku v sekci Nejdůležitější zprávy.</li>
+        </ol>
+        <div class="expected">✓ Přehled zobrazuje dnešní datum v záhlaví. Sekce zahrnují Nejdůležitější zprávy, Bezpečnostní přehled, Vydání a Komunitní dění. Tučné nadpisy sekcí jsou červené. CVE záznamy se zobrazují oranžově. Klepnutím na odkaz zprávy se otevře článek. Obnovení táhnutím znovu načte přehled.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-03</span>
+        <div class="test-title">Plánované doručení přehledu (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Denní přehled → zapněte plánované doručení.</li>
+          <li>Nastavte hodinu doručení (pro testování zvolte hodinu, která brzy nastane).</li>
+          <li>Uložte.</li>
+        </ol>
+        <div class="expected">✓ Plán se uloží bez chyby. V nastavené hodině dorazí push notifikace s personalizovaným přehledem. Poznámka: úplné ověření end-to-end vyžaduje počkání na nastavenou hodinu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 8: OCP + CVE -->
+  <section id="ocp">
+    <h2><span class="num">8</span> Verze OCP a CVE upozornění</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-OCP-01</span>
+        <div class="test-title">Seznam verzí OCP se zobrazí správně</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na záložku Zdroje v dolní navigaci.</li>
+          <li>Prohlédněte si seznam verzí.</li>
+        </ol>
+        <div class="expected">✓ Aktivní stabilní kanály (minimálně 4.16 až 4.21) jsou v seznamu, každý s číslem nejnovější stabilní verze. Barevné kódování: první dvě jsou zelené (NEJNOVĚJŠÍ), další dvě jantarové (PODPOROVANÉ), starší šedé (ÚDRŽBA).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-OCP-02</span>
+        <div class="test-title">Kopírování souhrnu verzí</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Na obrazovce Verze OCP klepněte na tlačítko KOPÍROVAT.</li>
+          <li>Vložte do poznámkové aplikace.</li>
+        </ol>
+        <div class="expected">✓ Schránka obsahuje větu jako „Nejnovější stabilní verze jsou 4.18.37, 4.19.27, 4.20.18 a 4.21.9". Vložený text je čistý bez přebytečných znaků.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-CVE-01</span>
+        <div class="test-title">CVE články v přehledu s odznaky závažnosti</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>V přehledu klepněte na filtrovací čip BEZPEČNOST.</li>
+          <li>Zkontrolujte výsledné karty článků.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se pouze CVE a bezpečnostní upozornění. Každá karta má oranžový levý pruh. Odznaky závažnosti (KRITICKÁ, DŮLEŽITÁ, STŘEDNÍ) jsou viditelné a barevně odlišené (červená, oranžová, jantarová).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-CVE-02</span>
+        <div class="test-title">CVE článek otevře upozornění Red Hat</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na libovolný CVE článek v přehledu.</li>
+        </ol>
+        <div class="expected">✓ Otevře se v integrovaném WebView s odkazem na bezpečnostní upozornění Red Hat. URL zobrazená v liště odpovídá access.redhat.com nebo GitHubu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 9: ODESLÁNÍ ODKAZU -->
+  <section id="submit">
+    <h2><span class="num">9</span> Odeslání odkazu</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-01</span>
+        <div class="test-title">Platná URL adresa se úspěšně odešle</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Klepněte na plovoucí tlačítko + (přidat odkaz) na obrazovce přehledu.</li>
+          <li>Vložte platnou veřejnou URL — např. https://kubernetes.io/blog/2025/01/priklad.</li>
+          <li>Volitelně přidejte název.</li>
+          <li>Klepněte na Odeslat.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se obrazovka úspěchu s potvrzovací zprávou. Odeslání se zobrazí ve frontě Supabase pro kontrolu vývojářem.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-02</span>
+        <div class="test-title">Duplicitní URL zobrazí přátelskou chybovou zprávu</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Odešlete stejnou URL podruhé.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se chybová zpráva „Tento odkaz byl již odeslán." Žádný duplicitní záznam není vytvořen.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-03</span>
+        <div class="test-title">Neplatná URL je blokována validací</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Zadejte „neplatnaurl" do pole URL a klepněte na Odeslat.</li>
+        </ol>
+        <div class="expected">✓ Před odesláním požadavku se zobrazí chyba validace: „Zadejte platnou URL začínající https://".</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 10: PŘIHLÁŠENÍ -->
+  <section id="auth">
+    <h2><span class="num">10</span> Přihlášení (magic link)</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-01</span>
+        <div class="test-title">Vyžádání přihlašovacího odkazu</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Účet → Přihlásit se.</li>
+          <li>Zadejte platnou e-mailovou adresu.</li>
+          <li>Klepněte na „Odeslat přihlašovací odkaz".</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se potvrzovací obrazovka s pokyny ke kontrole doručené pošty. Žádný pád, žádný spinner běžící donekonečna.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-02</span>
+        <div class="test-title">Otevření magic linku na stejném zařízení</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete e-mailového klienta na stejném zařízení, kde je nainstalován ShiftFeed.</li>
+          <li>Najděte e-mail s přihlášením do ShiftFeed.</li>
+          <li>Klepněte na přihlašovací odkaz.</li>
+        </ol>
+        <div class="expected">✓ ShiftFeed se otevře (nebo přejde do popředí) a přihlášený stav se zobrazí v Nastavení → Účet. Zobrazí se vaše e-mailová adresa.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-03</span>
+        <div class="test-title">Expirovaný nebo již použitý odkaz</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Vyžádejte si odkaz, úspěšně se přihlaste.</li>
+          <li>Klepněte na stejný odkaz znovu z e-mailu.</li>
+        </ol>
+        <div class="expected">✓ Aplikace zobrazí inline chybovou zprávu navrhující vyžádat si nový přihlašovací odkaz. Žádný pád. Žádná prázdná bílá obrazovka.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-04</span>
+        <div class="test-title">Odhlášení</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Účet → Odhlásit se.</li>
+          <li>Potvrďte dialog.</li>
+        </ol>
+        <div class="expected">✓ Účet se vrátí do stavu „Žádný účet / přihlásit se". Veškeré UI prvky pouze pro Pro zmizí. Lokální záložky zůstanou nedotčeny.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-05</span>
+        <div class="test-title">Platební brána spustí přihlášení před nákupem</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Bez přihlášení spusťte libovolnou Pro funkci (např. ikona AI přehledu).</li>
+        </ol>
+        <div class="expected">✓ Nejprve se zobrazí přihlašovací panel (AuthSheet). Po dokončení přihlášení se platební panel automaticky obnoví pro výběr plánu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 11: NOTIFIKACE -->
+  <section id="notifications">
+    <h2><span class="num">11</span> Push notifikace</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-01</span>
+        <div class="test-title">Výzva k povolení notifikací při prvním spuštění</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Proveďte čerstvou instalaci (nebo smažte data aplikace) a spusťte ShiftFeed.</li>
+        </ol>
+        <div class="expected">✓ Na Androidu 13+ nebo iOS se zobrazí systémový dialog povolení notifikací. Povolením se zařízení přihlásí k odběru témat „all", „security" a „releases".</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-02</span>
+        <div class="test-title">Push notifikace CVE dorazí a otevře správný obsah</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Požádejte vývojáře o odeslání testovací notifikace do tématu security.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přesuňte aplikaci na pozadí.</li>
+          <li>Počkejte na notifikaci.</li>
+          <li>Klepněte na notifikaci.</li>
+        </ol>
+        <div class="expected">✓ Notifikace dorazí do systémové lišty s názvem jako „🔴 KRITICKÁ: CVE-XXXX-XXXX". Klepnutím se otevře ShiftFeed a naviguje na příslušný článek.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-03</span>
+        <div class="test-title">Dávková notifikace pro více upozornění</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Požádejte vývojáře o odeslání dávkové testovací notifikace.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Počkejte na notifikaci, když je v jednom běhu scraperu nalezeno více CVE nebo vydání.</li>
+        </ol>
+        <div class="expected">✓ Dorazí jedna dávková notifikace (např. „🔴 3 nová bezpečnostní upozornění") místo jednotlivých notifikací pro každou položku.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-04</span>
+        <div class="test-title">Přepínač tématu se zachová (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Notifikace → vypněte téma „releases".</li>
+          <li>Vynuťte zavření a znovu spusťte aplikaci.</li>
+          <li>Vraťte se do Nastavení → Notifikace.</li>
+        </ol>
+        <div class="expected">✓ Přepínač „releases" zůstane po restartu vypnutý. Free uživatelé při klepnutí na libovolný přepínač uvidí platební obrazovku.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-05</span>
+        <div class="test-title">Vlastní pravidlo upozornění (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Pravidla upozornění → klepněte na „Přidat pravidlo".</li>
+          <li>Nastavte název „OCP 4.21", klíčové slovo „4.21", kategorie „release".</li>
+          <li>Uložte a povolte pravidlo.</li>
+        </ol>
+        <div class="expected">✓ Pravidlo se uloží a zobrazí se v seznamu v povoleném stavu. Když je seškrábán nový článek odpovídající klíčovému slovu „4.21", dorazí cílená notifikace pouze na toto zařízení.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 12: VLASTNÍ RSS -->
+  <section id="rss">
+    <h2><span class="num">12</span> Vlastní RSS zdroje</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-01</span>
+        <div class="test-title">Přidání platného vlastního RSS zdroje</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nastavení → Vlastní zdroje → „Přidat zdroj".</li>
+          <li>Zadejte název (např. „Můj blog") a platnou RSS URL (např. https://thenewstack.io/feed/).</li>
+          <li>Uložte.</li>
+        </ol>
+        <div class="expected">✓ Zdroj se zobrazí v seznamu. Po dalším běhu scraperu (do 1 hodiny) se indikátor stavu přepne na zelený. Články z tohoto zdroje se zobrazí v hlavním přehledu označené „custom_feed".</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-02</span>
+        <div class="test-title">Články vlastního zdroje jsou soukromé</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přidejte vlastní RSS zdroj na Účtu A.</li>
+          <li>Přihlaste se s jiným Účtem B na jiném zařízení.</li>
+          <li>Zkontrolujte přehled na Účtu B.</li>
+        </ol>
+        <div class="expected">✓ Články z vlastního RSS zdroje Účtu A se pro Účet B nezobrazí. Zabezpečení na úrovni řádků zajišťuje, že zdroje jsou vázány na uživatele.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-03</span>
+        <div class="test-title">Neplatná URL zobrazí chybový stav</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přidejte zdroj s URL „https://neexistujicirsszdroj.example.com/feed".</li>
+        </ol>
+        <div class="expected">✓ Po dalším běhu scraperu zůstane indikátor stavu červený a zobrazí chybovou zprávu parsování. Žádný pád.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-04</span>
+        <div class="test-title">Smazání vlastního RSS zdroje</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Smažte dříve přidaný vlastní zdroj.</li>
+          <li>Potvrďte dialog.</li>
+        </ol>
+        <div class="expected">✓ Zdroj zmizí ze seznamu. Dříve stažené články z tohoto zdroje zmizí z hlavního přehledu během jednoho cyklu scraperu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 13: PLATEBNÍ BRÁNA -->
+  <section id="paywall">
+    <h2><span class="num">13</span> Předplatné a oprávnění</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-01</span>
+        <div class="test-title">Vzhled platební obrazovky</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Spusťte libovolnou Pro funkci (např. ikona AI přehledu) při Free účtu.</li>
+          <li>Pečlivě si prohlédněte platební panel.</li>
+        </ol>
+        <div class="expected">✓ Panel zobrazuje pět výhod. Přepínač měsíčně/ročně je přítomen. Odznak „Ušetříte 40 %" u roční možnosti. Ceny se zobrazují v místní měně (ne v USD, pokud nejste v USA). Výzva k „7denní bezplatné zkušební verzi" je výrazná.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-02</span>
+        <div class="test-title">Zahájení zkušební verze nejprve spustí přihlášení při odhlášení</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Bez přihlášení klepněte na „Zahájit bezplatnou zkušební verzi" na platební obrazovce.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se AuthSheet pro přihlášení. Po dokončení přihlášení se platební panel automaticky obnoví — uživatel se k němu nemusí manuálně vracet.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-03</span>
+        <div class="test-title">Sandboxový nákup dokončí a odemkne Pro</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Použijte sandbox/testovací účet v Play Store nebo App Store sandboxu — nepoužívejte skutečný způsob platby.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Dokončete sandboxový nákup přes „Zahájit bezplatnou zkušební verzi".</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se SnackBar „Vítejte v Pro 🎉". V horní liště se zobrazí odznak PRO. Pro funkce se odemknou okamžitě bez nutnosti restartu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-04</span>
+        <div class="test-title">Zrušení ze systémového panelu je tiché</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete platební obrazovku, klepněte na „Zahájit bezplatnou zkušební verzi".</li>
+          <li>Když se zobrazí systémový panel nákupu, zrušte/zavřete jej.</li>
+        </ol>
+        <div class="expected">✓ Nezobrazí se žádný chybový SnackBar. Platební panel se jednoduše zavře. Uživatel se vrátí na místo, kde v aplikaci byl.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-05</span>
+        <div class="test-title">Obnovení nákupů při čerstvé instalaci</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Na zařízení s aktivním předplatným odinstalujte a znovu nainstalujte aplikaci.</li>
+          <li>Přihlaste se ke stejnému účtu.</li>
+          <li>Klepněte na „Obnovit nákupy" v Nastavení nebo po výzvě.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se SnackBar „Nákupy obnoveny". Odznak PRO se aktivuje. Pro funkce budou dostupné bez opakovaného nákupu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 14: VZHLED -->
+  <section id="theme">
+    <h2><span class="num">14</span> Vzhled a vizuální design</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-01</span>
+        <div class="test-title">Přepínač světlého a tmavého režimu</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>V liště Nastavení klepněte na ikonu slunce/měsíce.</li>
+          <li>Přepněte mezi světlým a tmavým režimem.</li>
+          <li>Vynuťte zavření a znovu spusťte aplikaci.</li>
+        </ol>
+        <div class="expected">✓ Celá aplikace okamžitě přepne motiv. Zvolený motiv se zachová po restartu. Při spuštění nedochází k záblesku nesprávného motivu.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-02</span>
+        <div class="test-title">Kontrast světlého režimu — žádný neviditelný text</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přepněte do světlého režimu.</li>
+          <li>Projděte: Přehled, Uložené, Verze OCP, AI přehled, Nastavení.</li>
+          <li>Vizuálně zkontrolujte každou obrazovku na černý text na černém pozadí nebo bílý na bílém.</li>
+        </ol>
+        <div class="expected">✓ Veškerý text je čitelný na každé obrazovce ve světlém režimu. Čipy štítků, odznaky a stavové popisky jsou všechny čitelné. Widget stavu systému by měl používat tmavě zelenou místo jasně zelené.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-03</span>
+        <div class="test-title">Žádné chyby přetečení rozložení</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přihlaste se s Pro, aby se v liště zobrazil odznak PRO.</li>
+          <li>Přejděte na každou obrazovku a zkontrolujte lištu aplikace.</li>
+        </ol>
+        <div class="expected">✓ Nikde se nezobrazí žluto-černý pruh „RenderFlex overflowed". Odznak PRO se vejde vedle názvu aplikace bez oříznutí.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-04</span>
+        <div class="test-title">Spodní panely nezakrývá systémová lišta gest</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Spusťte platební panel, AuthSheet a panel „Přidat zdroj" pro vlastní RSS.</li>
+          <li>Zkontrolujte, zda jsou akční tlačítka v dolní části každého panelu dostupná.</li>
+        </ol>
+        <div class="expected">✓ Tlačítka nejsou skryta za lištou navigace gest Androidu ani za indikátorem Home na iOS. Všechny klepatelné prvky jsou dostupné bez zavření panelu.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 15: NASTAVENÍ -->
+  <section id="settings">
+    <h2><span class="num">15</span> Obrazovka Nastavení</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-01</span>
+        <div class="test-title">Všechny sekce nastavení se zobrazují a jsou klepatelné</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Otevřete Nastavení.</li>
+          <li>Klepněte na sekce Odeslat odkaz, Zdroje, Data, Odkazy.</li>
+        </ol>
+        <div class="expected">✓ Všechny sekce se zobrazí bez prázdných karet. Klepnutím na každou se buď přejde dál nebo otevře panel — nic není nefunkční. Žádné chybějící texty ani zástupné popisky.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-02</span>
+        <div class="test-title">Popisek verze aplikace je vyplněn</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přesuňte se úplně dolů v Nastavení.</li>
+        </ol>
+        <div class="expected">✓ Popisek verze zobrazuje aktuální sestavení — např. „v1.0.0". Není prázdný a nezobrazuje „v..." jako zástupný text.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-03</span>
+        <div class="test-title">Kopírování RevenueCat ID</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Úplně dole v Nastavení klepněte na „Kopírovat RevenueCat ID".</li>
+          <li>Vložte do poznámek.</li>
+        </ol>
+        <div class="expected">✓ SnackBar potvrdí „RevenueCat ID zkopírováno". Vložený řetězec začíná „$RCAnonymousID:" (pokud nejste přihlášeni) nebo odpovídá formátu UUID (pokud jste přihlášeni). Není prázdný.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 16: HRANIČNÍ PŘÍPADY -->
+  <section id="edge">
+    <h2><span class="num">16</span> Hraniční případy a regrese</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-01</span>
+        <div class="test-title">Chování v offline režimu</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Zapněte Letový režim.</li>
+          <li>Spusťte ShiftFeed ze studena.</li>
+          <li>Táhněte dolů pro obnovení.</li>
+        </ol>
+        <div class="expected">✓ Aplikace se spustí. Zobrazí se dříve uložené články. Při obnovení táhnutím se zobrazí jasný indikátor „bez sítě" nebo „offline". Žádný pád.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-02</span>
+        <div class="test-title">Obnovení po dlouhé době na pozadí</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přesuňte aplikaci na pozadí a 30+ minut používejte jiné aplikace.</li>
+          <li>Vraťte se do ShiftFeed.</li>
+        </ol>
+        <div class="expected">✓ Aplikace se obnoví bez pádu. Přehled znovu načte nový obsah. Žádný zastaralý spinner ani zmrzlá obrazovka.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-03</span>
+        <div class="test-title">Zpracování push notifikace v popředí</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Pouze nativní</span></div>
+      <div class="test-body">
+        <div class="label">Předpoklad</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Požádejte vývojáře o odeslání testovací notifikace, zatímco máte aplikaci otevřenou.</p>
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Nechte ShiftFeed v popředí.</li>
+          <li>Přijměte push notifikaci.</li>
+        </ol>
+        <div class="expected">✓ Zobrazí se in-app banner nebo SnackBar — v systémové liště se nezobrazí žádná položka notifikace. Žádný pád. Stav aplikace není ovlivněn.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-04</span>
+        <div class="test-title">Zachování stavu po studeném restartu</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Kroky</div>
+        <ol>
+          <li>Přidejte záložku ke dvěma článkům, přepněte na tmavý režim, přihlaste se.</li>
+          <li>Zcela ukončete aplikaci z přepínače aplikací.</li>
+          <li>Znovu spusťte.</li>
+        </ol>
+        <div class="expected">✓ Záložky jsou přítomny. Tmavý režim je aktivní. Přihlášený stav je zachován. Předvolby témat notifikací jsou beze změny.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <!-- SEKCE 17: ZÁVĚREČNÉ ZHODNOCENÍ -->
+  <section id="signoff">
+    <h2><span class="num">17</span> Závěrečné zhodnocení</h2>
+    <p>Prosím vyplňte níže uvedenou tabulku a přiložte ji ke své zpětné vazbě.</p>
+
+    <table class="signoff-table">
+      <thead>
+        <tr>
+          <th>Pole</th>
+          <th>Váš záznam</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Jméno testera</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Model zařízení</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Verze OS</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Verze aplikace</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Datum testování</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Celkem testů prošlo</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Celkem testů selhalo</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Počet blokerů (pády / ztráta dat)</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Celkový dojem (1–5)</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Nejkritičtější nalezený problém</td><td class="write">&nbsp;</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1rem;">Po dokončení zašlete své zhodnocení a hlášení chyb na:</p>
+    <div class="contact-box">
+      <span style="font-size:1.25rem;">✉</span>
+      <a href="mailto:bobek.roman@gmail.com">bobek.roman@gmail.com</a>
+    </div>
+
+    <p style="margin-top:1rem;color:var(--muted);font-size:0.875rem;">Děkujeme, že jste si udělali čas na testování ShiftFeed. Vaše zpětná vazba přímo ovlivňuje to, co se opraví před veřejným vydáním.</p>
+
+    <div class="back-to-top"><a href="#top">↑ Zpět nahoru</a></div>
+  </section>
+
+  <footer>
+    <p>ShiftFeed &nbsp;·&nbsp; Beta testovací plán &nbsp;·&nbsp; vydání Golden Gate &nbsp;·&nbsp; Pouze mobilní aplikace</p>
+    <p style="margin-top:0.4rem;">Platné od 7. května 2026 &nbsp;·&nbsp; Webová a desktopová verze jsou mimo rozsah tohoto kola.</p>
+  </footer>
+
+</div>
+</body>
+</html>

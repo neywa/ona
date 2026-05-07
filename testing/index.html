@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShiftFeed – Beta Test Plan (Golden Gate)</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --ink: #1c1a17;
+      --muted: #6b6560;
+      --accent: #EE0000;
+      --border: #e2ddd7;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.75;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .wrap { max-width: 720px; margin: 0 auto; }
+
+    header {
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+
+    .app-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3em 0.85em;
+      border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+    }
+
+    .meta { color: var(--muted); font-size: 0.875rem; }
+
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.8em;
+      height: 1.8em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    h3:first-of-type { margin-top: 0.5rem; }
+
+    p { color: var(--ink); margin-bottom: 0.75rem; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    li { margin-bottom: 0.3rem; color: var(--ink); }
+
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+    a:hover { border-bottom-color: var(--accent); }
+
+    .highlight {
+      background: #fff0f0;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 0.85rem 1rem;
+      margin: 0.75rem 0;
+      font-size: 0.925rem;
+    }
+
+    /* TOC */
+    .toc { list-style: none; padding: 0; }
+    .toc li { margin-bottom: 0.4rem; }
+    .toc a {
+      font-size: 0.9rem;
+      color: var(--ink);
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .toc a:hover { color: var(--accent); }
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.6em;
+      height: 1.6em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* Test cases */
+    .test-case {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .test-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-checkbox {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .test-id {
+      font-family: 'DM Sans', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15em 0.5em;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .test-title {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .badges { display: flex; gap: 0.35rem; flex-wrap: wrap; margin: 0.5rem 0 0.65rem 2.55rem; }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15em 0.6em;
+      border-radius: 99px;
+      border: 1px solid;
+    }
+
+    .badge-free { background: #f0f7ee; border-color: #9ac989; color: #3b6d11; }
+    .badge-pro { background: #eeedfe; border-color: #afa9ec; color: #3c3489; }
+    .badge-android { background: #e8f5e9; border-color: #81c784; color: #1b5e20; }
+    .badge-ios { background: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
+    .badge-native { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
+
+    .test-body { margin-left: 2.55rem; font-size: 0.9rem; }
+    .test-body .label { font-weight: 500; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; margin-bottom: 0.2rem; }
+    .test-body ol { padding-left: 1.25rem; margin-bottom: 0.5rem; }
+    .test-body ol li { margin-bottom: 0.2rem; }
+    .expected { background: #f0f7ee; border-left: 2px solid #9ac989; border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #2d4a26; margin-top: 0.35rem; }
+
+    .back-to-top { text-align: right; margin-top: 1.25rem; }
+    .back-to-top a { font-size: 0.8rem; color: var(--muted); }
+
+    /* Sign-off table */
+    .signoff-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 0.75rem; }
+    .signoff-table th { text-align: left; font-weight: 500; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding: 0.5rem 0.75rem; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .signoff-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--ink); }
+    .signoff-table td.write { background: #fffcf9; min-width: 100px; }
+    .signoff-table tr:last-child td { border-bottom: none; }
+
+    .contact-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 540px) {
+      section { padding: 1.25rem 1rem; }
+      .test-case { padding: 0.85rem 1rem; }
+      .test-body { margin-left: 0; }
+      .badges { margin-left: 0; }
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; font-size: 14px; }
+      section { box-shadow: none; break-inside: avoid; }
+      .test-case { break-inside: avoid; }
+      a { color: var(--ink); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header id="top">
+    <div class="app-badge">ShiftFeed · Golden Gate</div>
+    <h1>Beta Test Plan</h1>
+    <p class="meta">Effective date: May 07, 2026 &nbsp;·&nbsp; Mobile only (Android + iOS) &nbsp;·&nbsp; ~45 minutes</p>
+  </header>
+
+  <!-- SUMMARY -->
+  <section>
+    <h2><span class="num">★</span> What you're testing</h2>
+    <p>ShiftFeed is an OpenShift and Kubernetes news aggregator for SREs, DevOps engineers, and platform engineers. It pulls articles from Red Hat Blog, Kubernetes Blog, CNCF, HackerNoon, and Hacker News, tracks OCP stable releases, surfaces Red Hat CVEs, and generates an AI-powered daily briefing.</p>
+    <div class="highlight"><strong>Scope of this round:</strong> the mobile app on Android and iOS only. Do not test the web build at neywa.github.io/shiftfeed — that is a separate target and is not in scope here.</div>
+    <p>The test plan is split into Free and Pro features. You can complete a full Free pass in about 30 minutes. Pro testing requires a promotional entitlement — see Section 3 for setup.</p>
+  </section>
+
+  <!-- TOC -->
+  <section>
+    <h2><span class="num">☰</span> Table of contents</h2>
+    <ul class="toc">
+      <li><a href="#env"><span class="toc-num">1</span> Environment setup</a></li>
+      <li><a href="#pro-setup"><span class="toc-num">2</span> Pro tier setup</a></li>
+      <li><a href="#reporting"><span class="toc-num">3</span> How to report a bug</a></li>
+      <li><a href="#feed"><span class="toc-num">4</span> Feed and article browsing</a></li>
+      <li><a href="#search"><span class="toc-num">5</span> Search</a></li>
+      <li><a href="#bookmarks"><span class="toc-num">6</span> Bookmarks</a></li>
+      <li><a href="#briefing"><span class="toc-num">7</span> AI daily briefing</a></li>
+      <li><a href="#ocp"><span class="toc-num">8</span> OCP versions and CVE alerts</a></li>
+      <li><a href="#submit"><span class="toc-num">9</span> Submit a link</a></li>
+      <li><a href="#auth"><span class="toc-num">10</span> Authentication</a></li>
+      <li><a href="#notifications"><span class="toc-num">11</span> Push notifications</a></li>
+      <li><a href="#rss"><span class="toc-num">12</span> Custom RSS feeds</a></li>
+      <li><a href="#paywall"><span class="toc-num">13</span> Subscriptions and entitlements</a></li>
+      <li><a href="#theme"><span class="toc-num">14</span> Theme and visual</a></li>
+      <li><a href="#settings"><span class="toc-num">15</span> Settings screen</a></li>
+      <li><a href="#edge"><span class="toc-num">16</span> Edge cases and regression</a></li>
+      <li><a href="#signoff"><span class="toc-num">17</span> Final sign-off</a></li>
+    </ul>
+  </section>
+
+  <!-- SECTION 1: ENVIRONMENT -->
+  <section id="env">
+    <h2><span class="num">1</span> Environment setup</h2>
+
+    <h3>Android</h3>
+    <ol>
+      <li>Install the Play Internal Testing build via the link the developer sent you.</li>
+      <li>Minimum supported version: Android 7.0 (API 24). Ideally test on Android 13+ for push notification behaviour.</li>
+      <li>Note the app version — you'll find it at the very bottom of the Settings screen.</li>
+      <li>Confirm you have Wi-Fi or cellular data available. The app degrades gracefully offline but most features need a connection.</li>
+    </ol>
+
+    <h3>iOS</h3>
+    <ol>
+      <li>Accept the TestFlight invite sent by the developer and install via TestFlight.</li>
+      <li>Minimum supported version: iOS 13.</li>
+      <li>Note the app version from the TestFlight app or from Settings inside ShiftFeed.</li>
+      <li>Confirm network access as above.</li>
+    </ol>
+
+    <div class="highlight">Web and desktop builds are <strong>out of scope</strong> for this round. If you open neywa.github.io/shiftfeed in a browser, please do not file issues against it — that is a separate release track.</div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 2: PRO SETUP -->
+  <section id="pro-setup">
+    <h2><span class="num">2</span> Pro tier setup</h2>
+    <p>Skip this section if you're only testing Free features. Come back here when you reach a Pro-tagged test case.</p>
+    <ol>
+      <li>Open ShiftFeed → tap Settings (gear icon).</li>
+      <li>Go to Account → Sign in → enter your email → tap "Send sign-in link".</li>
+      <li>Open the magic-link email on the same device → tap the link → ShiftFeed opens and you're signed in.</li>
+      <li>Back in Settings, scroll to the very bottom → tap <strong>Copy RevenueCat ID</strong>.</li>
+      <li>Send that ID to the developer via email or Slack. They will grant a Pro promotional entitlement from the RevenueCat dashboard.</li>
+      <li>Once confirmed, fully restart the app (swipe it away from recents and relaunch).</li>
+      <li>A <strong>PRO</strong> badge should appear next to "ShiftFeed" in the top app bar.</li>
+      <li>In Settings, the Notifications, Alert Rules, Daily Briefing, and Custom Feeds sections should show real content instead of upgrade prompts.</li>
+    </ol>
+    <div class="highlight">If the PRO badge doesn't appear after restarting, tap Settings → scroll to bottom → "Restore purchases" and try again.</div>
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 3: REPORTING -->
+  <section id="reporting">
+    <h2><span class="num">3</span> How to report a bug</h2>
+    <p>For every issue you find, please include:</p>
+    <ul>
+      <li><strong>Test ID</strong> — e.g. T-FEED-03</li>
+      <li><strong>Device model and OS version</strong> — e.g. Samsung Galaxy S23 Ultra, Android 16</li>
+      <li><strong>App version</strong> — from the bottom of the Settings screen</li>
+      <li><strong>Steps to reproduce</strong> — what you did, in order</li>
+      <li><strong>Expected vs actual</strong> — what should have happened vs what did</li>
+      <li><strong>Screenshot or screen recording</strong> — if possible, attach one</li>
+    </ul>
+    <div class="contact-box">
+      <span style="font-size:1.25rem;">✉</span>
+      <div>Send bug reports to: <a href="mailto:bobek.roman@gmail.com">bobek.roman@gmail.com</a> or via Slack as agreed with the developer.</div>
+    </div>
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 4: FEED -->
+  <section id="feed">
+    <h2><span class="num">4</span> Feed and article browsing</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-01</span>
+        <div class="test-title">App launches without crash and shows the feed</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Cold-launch ShiftFeed from the home screen.</li>
+          <li>Wait for the feed to load.</li>
+          <li>Pull down to refresh.</li>
+        </ol>
+        <div class="expected">✓ App opens without crashing. Feed loads recent articles from multiple sources. Pull-to-refresh fetches new items and shows a loading indicator while doing so.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-02</span>
+        <div class="test-title">Grid and list view toggle</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>In the top app bar, tap the grid/list toggle icon.</li>
+          <li>Switch between grid and list.</li>
+          <li>Background the app and return.</li>
+        </ol>
+        <div class="expected">✓ Layout changes immediately between compact list and card grid. The chosen layout persists when returning to the app.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-03</span>
+        <div class="test-title">Source filter chips</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Below the app bar, tap a source chip (e.g. "Red Hat Blog").</li>
+          <li>Observe the feed.</li>
+          <li>Tap the chip again or tap "ALL" to clear the filter.</li>
+        </ol>
+        <div class="expected">✓ Feed filters to show only articles from the selected source. Clearing returns the full feed. The selected chip has a distinct highlighted appearance.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-04</span>
+        <div class="test-title">Tag filter from article card</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Find an article card that shows tag chips (e.g. #security, #kubernetes).</li>
+          <li>Tap one of the tag chips.</li>
+        </ol>
+        <div class="expected">✓ Feed filters to articles tagged with that tag. The search bar populates with #tagname showing the active filter.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-05</span>
+        <div class="test-title">Infinite scroll and free tier limit</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Scroll down steadily through the feed.</li>
+          <li>Continue past the initial 30 articles.</li>
+          <li>Keep scrolling until no more articles load.</li>
+        </ol>
+        <div class="expected">✓ New articles load automatically as you approach the bottom. After approximately 50 articles, a "free limit" tile appears. Tapping the upgrade button on that tile opens the paywall sheet.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-06</span>
+        <div class="test-title">Article tap opens correct destination</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap a standard blog article (e.g. from Red Hat Blog or Kubernetes Blog).</li>
+          <li>Then tap a CVE article (tagged with #cve).</li>
+          <li>Then tap a GitHub Releases article.</li>
+        </ol>
+        <div class="expected">✓ Blog articles open in the in-app WebView with source name in the toolbar and an external-link icon. CVE and release articles open in WebView. All load within a few seconds with a progress indicator.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-FEED-07</span>
+        <div class="test-title">Card visual design — accent colours and metadata</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Scroll through the feed and visually inspect several cards from different sources.</li>
+          <li>Look at the left edge accent stripe, the source favicon, relative time, and tags.</li>
+        </ol>
+        <div class="expected">✓ Each card has a coloured left stripe (red for Red Hat, green for releases, orange for CVEs, bright green for HackerNoon). Source favicon is visible. Relative time shows correctly ("2h ago"). Tags appear in muted grey except CVE (orange) and release (green).</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 5: SEARCH -->
+  <section id="search">
+    <h2><span class="num">5</span> Search</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-01</span>
+        <div class="test-title">Search bar opens and closes</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap the magnifying-glass icon in the top app bar.</li>
+          <li>Observe the layout change.</li>
+          <li>Tap the back arrow or press the Android back gesture.</li>
+        </ol>
+        <div class="expected">✓ The app bar title is replaced by a text input with autofocus — the keyboard appears immediately. Tapping back exits search mode and returns to the normal feed.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-02</span>
+        <div class="test-title">Keyword search returns results from full database</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open search and type "openshift" (wait ~400ms for debounce).</li>
+          <li>Observe results.</li>
+          <li>Clear and try "gateway api".</li>
+        </ol>
+        <div class="expected">✓ Results appear from the full database (not just the currently loaded page). Results are relevant to the keyword. A result count appears in the subtitle area.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-03</span>
+        <div class="test-title">Tag search with # prefix</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open search and type "#kubernetes".</li>
+          <li>Then try "#cve".</li>
+          <li>Then try "#release".</li>
+        </ol>
+        <div class="expected">✓ Results filter to articles specifically tagged with that tag. "#cve" should return only security advisories. "#release" only release announcements.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SRCH-04</span>
+        <div class="test-title">Empty search result state</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open search and type "xyznotexistentterm".</li>
+        </ol>
+        <div class="expected">✓ A friendly empty state appears with a search-off icon and the message "No results for…". A "Clear search" button is visible and functional.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 6: BOOKMARKS -->
+  <section id="bookmarks">
+    <h2><span class="num">6</span> Bookmarks</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-01</span>
+        <div class="test-title">Save and unsave a bookmark</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Find any article card in the feed.</li>
+          <li>Tap the bookmark icon on the card.</li>
+          <li>Tap it again.</li>
+        </ol>
+        <div class="expected">✓ A SnackBar confirms "Article saved". The bookmark icon fills (solid). Tapping again shows "Bookmark removed" and the icon becomes outline again.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-02</span>
+        <div class="test-title">Saved screen shows bookmarks and opens articles</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Bookmark two articles from the feed.</li>
+          <li>Tap the Saved tab in the bottom navigation.</li>
+          <li>Tap one of the bookmarked articles.</li>
+        </ol>
+        <div class="expected">✓ Both saved articles appear in the Saved screen. Tapping one opens the article (browser or WebView as appropriate).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-03</span>
+        <div class="test-title">Swipe to delete a bookmark</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>In the Saved screen, swipe a bookmark card to the left.</li>
+        </ol>
+        <div class="expected">✓ A red delete indicator appears. On completing the swipe, the bookmark is removed from the list.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-04</span>
+        <div class="test-title">Clear all bookmarks</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>With at least two bookmarks saved, open the Saved screen.</li>
+          <li>Tap the delete/sweep icon in the top app bar.</li>
+          <li>Confirm the dialog.</li>
+        </ol>
+        <div class="expected">✓ A confirmation dialog appears before clearing. After confirming, all bookmarks are removed and the empty state illustration is shown.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-05</span>
+        <div class="test-title">Cloud sync indicator (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Signed in with Pro entitlement.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open the Saved screen.</li>
+          <li>Look at the screen title area.</li>
+        </ol>
+        <div class="expected">✓ A cloud icon appears next to the "Saved" title, indicating bookmarks are being synced to the cloud.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-06</span>
+        <div class="test-title">Cross-device bookmark sync (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Access to two devices signed into the same account with Pro.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Bookmark three articles on Device A.</li>
+          <li>Open the Saved screen on Device B.</li>
+        </ol>
+        <div class="expected">✓ The same bookmarks appear on Device B within a few seconds, without any manual sync action.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-07</span>
+        <div class="test-title">Export bookmarks (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>In the Saved screen, tap the export icon in the app bar.</li>
+          <li>Choose Markdown or PDF.</li>
+        </ol>
+        <div class="expected">✓ The system share sheet opens with a generated file. The file contains the bookmarked articles with titles and URLs.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-08</span>
+        <div class="test-title">Sign out reverts to local bookmarks (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>While signed in with Pro, sign out (Settings → Account → Sign out).</li>
+          <li>Open the Saved screen.</li>
+        </ol>
+        <div class="expected">✓ The cloud icon disappears. Bookmarks remain visible (stored locally). The "Upgrade to Pro to sync bookmarks" banner appears.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-BM-09</span>
+        <div class="test-title">Upgrade prompt for free users</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Without signing in or with a non-Pro account, open the Saved screen.</li>
+        </ol>
+        <div class="expected">✓ An "Upgrade to Pro to sync bookmarks" banner appears above the bookmark list. Tapping the Upgrade button opens the paywall sheet.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 7: AI BRIEFING -->
+  <section id="briefing">
+    <h2><span class="num">7</span> AI daily briefing</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-01</span>
+        <div class="test-title">Briefing access — free vs Pro gate</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap the sparkle (✨) icon in the top app bar while on a Free account.</li>
+          <li>Repeat while signed in with Pro.</li>
+        </ol>
+        <div class="expected">✓ Free: paywall sheet appears. Pro: digest screen opens showing the latest AI briefing.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-02</span>
+        <div class="test-title">Digest content and formatting (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open the digest screen as a Pro user.</li>
+          <li>Read through the content.</li>
+          <li>Tap an article link in the Top Stories section.</li>
+        </ol>
+        <div class="expected">✓ Digest shows today's date in the header. Sections include Top Stories, Security Watch, Releases, and Community Buzz. Bold section headers are red. CVE entries appear in orange. Tapping a story link opens the article. Pull-to-refresh reloads the digest.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AI-03</span>
+        <div class="test-title">Scheduled digest delivery (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Daily Briefing → enable scheduled delivery.</li>
+          <li>Set a delivery hour (pick one that's coming soon for testing).</li>
+          <li>Save.</li>
+        </ol>
+        <div class="expected">✓ Schedule saves without error. At the configured hour, a push notification for the personalised digest arrives. Note: full end-to-end verification requires waiting for the scheduled hour.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 8: OCP + CVE -->
+  <section id="ocp">
+    <h2><span class="num">8</span> OCP versions and CVE alerts</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-OCP-01</span>
+        <div class="test-title">OCP versions list renders correctly</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap the Sources tab in the bottom navigation.</li>
+          <li>Observe the version list.</li>
+        </ol>
+        <div class="expected">✓ Active stable channels (4.16 through 4.21 at minimum) are listed, each showing the latest stable version number. Color coding: top two are green (LATEST), next two amber (SUPPORTED), older grey (MAINTENANCE).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-OCP-02</span>
+        <div class="test-title">Copy version summary</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>On the OCP Versions screen, tap the COPY button.</li>
+          <li>Paste into a notes app.</li>
+        </ol>
+        <div class="expected">✓ Clipboard contains a sentence like "Latest stable versions are 4.18.37, 4.19.27, 4.20.18 and 4.21.9". Pasted text is clean with no extra characters.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-CVE-01</span>
+        <div class="test-title">CVE articles in feed with severity badges</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>In the feed, tap the SECURITY filter chip.</li>
+          <li>Inspect the resulting article cards.</li>
+        </ol>
+        <div class="expected">✓ Only CVE and security advisory articles show. Each card has an orange left border. Severity badges (CRITICAL, IMPORTANT, MODERATE) are visible and colour-coded (red, orange, amber).</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-CVE-02</span>
+        <div class="test-title">CVE article opens Red Hat advisory</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap any CVE article in the feed.</li>
+        </ol>
+        <div class="expected">✓ Opens in the in-app WebView pointing to the Red Hat security advisory. The URL shown in the toolbar matches access.redhat.com or a GitHub advisory.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 9: SUBMIT A LINK -->
+  <section id="submit">
+    <h2><span class="num">9</span> Submit a link</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-01</span>
+        <div class="test-title">Valid URL submits successfully</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Tap the + (add link) floating button on the feed screen.</li>
+          <li>Paste a valid, public URL — e.g. https://kubernetes.io/blog/2025/01/example.</li>
+          <li>Optionally add a title.</li>
+          <li>Tap Submit.</li>
+        </ol>
+        <div class="expected">✓ A success screen appears with a confirmation message. The submission appears in the Supabase queue for developer review.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-02</span>
+        <div class="test-title">Duplicate URL shows friendly error</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Submit the same URL a second time.</li>
+        </ol>
+        <div class="expected">✓ Error message "This URL has already been submitted." appears inline. No duplicate is created.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SUB-03</span>
+        <div class="test-title">Invalid URL blocked by validation</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Enter "notaurl" in the URL field and tap Submit.</li>
+        </ol>
+        <div class="expected">✓ A validation error appears before the network request is made: "Please enter a valid URL starting with https://".</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 10: AUTH -->
+  <section id="auth">
+    <h2><span class="num">10</span> Authentication (magic-link sign-in)</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-01</span>
+        <div class="test-title">Request a sign-in link</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Account → Sign in.</li>
+          <li>Enter a valid email address.</li>
+          <li>Tap "Send sign-in link".</li>
+        </ol>
+        <div class="expected">✓ A confirmation screen appears with instructions to check the inbox. No crash, no spinner left running indefinitely.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-02</span>
+        <div class="test-title">Open magic link on the same device</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open the email client on the same device that ShiftFeed is installed on.</li>
+          <li>Find the ShiftFeed sign-in email.</li>
+          <li>Tap the sign-in link.</li>
+        </ol>
+        <div class="expected">✓ ShiftFeed opens (or comes to the foreground) and the signed-in state appears in Settings → Account. Your email address is shown.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-03</span>
+        <div class="test-title">Expired or already-used link</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Request a link, use it to sign in successfully.</li>
+          <li>Tap the same link again from the email.</li>
+        </ol>
+        <div class="expected">✓ App shows an inline error message suggesting the user request a fresh sign-in link. No crash. No empty white screen.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-04</span>
+        <div class="test-title">Sign out</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Account → Sign out.</li>
+          <li>Confirm the dialog.</li>
+        </ol>
+        <div class="expected">✓ Account reverts to "No account / sign in" state. Any Pro-only UI disappears. Local bookmarks remain intact.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-AUTH-05</span>
+        <div class="test-title">Paywall triggers auth before purchase</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>While signed out, trigger any Pro feature (e.g. tap the AI briefing icon).</li>
+        </ol>
+        <div class="expected">✓ The sign-in sheet (AuthSheet) appears first. After completing sign-in, the paywall sheet automatically resumes for plan selection.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 11: NOTIFICATIONS -->
+  <section id="notifications">
+    <h2><span class="num">11</span> Push notifications</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-01</span>
+        <div class="test-title">Permission prompt on first launch</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Fresh install (or clear app data) and launch ShiftFeed.</li>
+        </ol>
+        <div class="expected">✓ On Android 13+ or iOS, the system notification permission dialog appears. Granting it subscribes the device to the "all", "security", and "releases" broadcast topics.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-02</span>
+        <div class="test-title">CVE push notification arrives and deep-links</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Ask the developer to trigger a test push to the security topic.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Background the app.</li>
+          <li>Wait for the notification.</li>
+          <li>Tap the notification.</li>
+        </ol>
+        <div class="expected">✓ Notification arrives in the system tray with a title like "🔴 CRITICAL: CVE-XXXX-XXXX". Tapping it opens ShiftFeed and navigates to the relevant article.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-03</span>
+        <div class="test-title">Batched notification for multiple alerts</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Ask the developer to trigger a batch test push.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Wait for the notification when multiple CVEs or releases are found in one scrape run.</li>
+        </ol>
+        <div class="expected">✓ A single batched notification arrives (e.g. "🔴 3 New Security Advisories") rather than individual notifications for each item.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-04</span>
+        <div class="test-title">Topic toggle persists (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Notifications → toggle the "releases" topic off.</li>
+          <li>Force-close and relaunch the app.</li>
+          <li>Return to Settings → Notifications.</li>
+        </ol>
+        <div class="expected">✓ The "releases" toggle remains off after relaunch. Free users tapping any toggle see the paywall instead.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-NOTIF-05</span>
+        <div class="test-title">Custom alert rule (Pro)</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Alert Rules → tap "Add rule".</li>
+          <li>Set name "OCP 4.21", keyword "4.21", category "release".</li>
+          <li>Save and enable the rule.</li>
+        </ol>
+        <div class="expected">✓ Rule saves and appears in the list in an enabled state. When a new article matching the keyword "4.21" is scraped, a targeted push arrives on this device only.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 12: CUSTOM RSS -->
+  <section id="rss">
+    <h2><span class="num">12</span> Custom RSS feeds</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-01</span>
+        <div class="test-title">Add a valid custom RSS source</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Settings → Custom Feeds → "Add source".</li>
+          <li>Enter a name (e.g. "My Blog") and a valid RSS URL (e.g. https://thenewstack.io/feed/).</li>
+          <li>Save.</li>
+        </ol>
+        <div class="expected">✓ The source appears in the list. After the next scraper run (up to 1 hour), the status indicator turns green. Articles from this feed appear in the main feed tagged "custom_feed".</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-02</span>
+        <div class="test-title">Custom feed articles are private</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Add a custom RSS source on Account A.</li>
+          <li>Sign in with a different Account B on another device.</li>
+          <li>Check the feed on Account B.</li>
+        </ol>
+        <div class="expected">✓ Articles from Account A's custom RSS source do not appear for Account B. Row-level security ensures feeds are user-scoped.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-03</span>
+        <div class="test-title">Malformed URL shows error status</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Add a source with URL "https://notarealrssfeed.example.com/feed".</li>
+        </ol>
+        <div class="expected">✓ After the next scraper run, the status indicator stays red and shows a parse error message. No crash.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-RSS-04</span>
+        <div class="test-title">Delete a custom RSS source</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Delete a previously added custom source.</li>
+          <li>Confirm the dialog.</li>
+        </ol>
+        <div class="expected">✓ The source disappears from the list. Previously fetched articles from that source disappear from the main feed within one scraper cycle.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 13: PAYWALL -->
+  <section id="paywall">
+    <h2><span class="num">13</span> Subscriptions and entitlements</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-01</span>
+        <div class="test-title">Paywall sheet appearance</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Trigger any Pro feature (e.g. AI briefing icon) while on a Free account.</li>
+          <li>Inspect the paywall sheet carefully.</li>
+        </ol>
+        <div class="expected">✓ Sheet shows five benefit bullets. Monthly / annual toggle present. "Save 40%" badge on the annual option. Prices show in your local currency (not USD if you're not in the US). A "7-day free trial" call-out is prominent.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-02</span>
+        <div class="test-title">Trial initiation triggers auth first when signed out</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>While signed out, tap "Start Free Trial" on the paywall.</li>
+        </ol>
+        <div class="expected">✓ AuthSheet appears for sign-in. After completing sign-in, the paywall resumes automatically — the user does not have to navigate back to it manually.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-03</span>
+        <div class="test-title">Sandbox purchase completes and unlocks Pro</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Use a sandbox/test account in Play Store or App Store sandbox — do not use a real payment method.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Complete a sandbox purchase via "Start Free Trial".</li>
+        </ol>
+        <div class="expected">✓ "Welcome to Pro 🎉" SnackBar appears. PRO badge appears in the AppBar. Pro features unlock immediately without requiring a restart.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-04</span>
+        <div class="test-title">Cancel from system sheet is silent</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open the paywall, tap "Start Free Trial".</li>
+          <li>When the system purchase sheet appears, cancel / dismiss it.</li>
+        </ol>
+        <div class="expected">✓ No error SnackBar appears. The paywall sheet simply dismisses. The user is returned to wherever they were in the app.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-PAY-05</span>
+        <div class="test-title">Restore purchases on fresh install</div>
+      </div>
+      <div class="badges"><span class="badge badge-pro">Pro</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>On a device with an active subscription, uninstall and reinstall the app.</li>
+          <li>Sign in with the same account.</li>
+          <li>Tap "Restore purchases" in Settings or when prompted.</li>
+        </ol>
+        <div class="expected">✓ "Purchases restored" SnackBar appears. PRO badge hydrates. Pro features become available without re-purchasing.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 14: THEME -->
+  <section id="theme">
+    <h2><span class="num">14</span> Theme and visual</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-01</span>
+        <div class="test-title">Light and dark mode toggle</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>In the Settings AppBar, tap the sun/moon icon.</li>
+          <li>Switch between light and dark.</li>
+          <li>Force-close and relaunch the app.</li>
+        </ol>
+        <div class="expected">✓ The entire app switches theme instantly. The chosen theme persists after relaunch. No flash of the wrong theme on startup.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-02</span>
+        <div class="test-title">Light mode contrast — no invisible text</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Switch to light mode.</li>
+          <li>Navigate through: Feed, Saved, OCP Versions, AI Briefing, Settings.</li>
+          <li>Visually check every screen for black-on-black or white-on-white text.</li>
+        </ol>
+        <div class="expected">✓ All text is legible on every screen in light mode. Tag chips, badges, and status labels are all readable. System status widget in particular should use dark green instead of bright green.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-03</span>
+        <div class="test-title">No layout overflow errors</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Sign in with Pro so the PRO badge appears in the AppBar.</li>
+          <li>Navigate to every screen and inspect the AppBar.</li>
+        </ol>
+        <div class="expected">✓ No yellow/black "RenderFlex overflowed" stripe appears anywhere. The PRO badge fits alongside the app title without truncation.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-UI-04</span>
+        <div class="test-title">Bottom sheets clear the system gesture bar</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Trigger the paywall sheet, AuthSheet, and the custom RSS "Add source" sheet.</li>
+          <li>Check whether the action buttons at the bottom of each sheet are accessible.</li>
+        </ol>
+        <div class="expected">✓ Buttons are not hidden behind the Android gesture navigation bar or the iOS home indicator. All tappable elements are reachable without dismissing the sheet first.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 15: SETTINGS -->
+  <section id="settings">
+    <h2><span class="num">15</span> Settings screen</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-01</span>
+        <div class="test-title">All settings sections render and are tappable</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Open Settings.</li>
+          <li>Tap through Submit a Link, Sources, Data, Links sections.</li>
+        </ol>
+        <div class="expected">✓ All sections render without blank cards. Tapping each one either navigates or opens a sheet — nothing is dead. No missing text or placeholder labels.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-02</span>
+        <div class="test-title">App version label is populated</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Scroll to the very bottom of Settings.</li>
+        </ol>
+        <div class="expected">✓ A version label shows the current build — e.g. "v1.0.0". It is not blank and does not show "v..." as a placeholder.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-SET-03</span>
+        <div class="test-title">Copy RevenueCat ID</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>At the very bottom of Settings, tap "Copy RevenueCat ID".</li>
+          <li>Paste into Notes.</li>
+        </ol>
+        <div class="expected">✓ SnackBar confirms "RevenueCat ID copied". Pasted string starts with "$RCAnonymousID:" (if not signed in) or matches a UUID format (if signed in). Not empty.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 16: EDGE CASES -->
+  <section id="edge">
+    <h2><span class="num">16</span> Edge cases and regression</h2>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-01</span>
+        <div class="test-title">Offline behaviour</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Enable Airplane mode.</li>
+          <li>Launch ShiftFeed cold.</li>
+          <li>Pull to refresh.</li>
+        </ol>
+        <div class="expected">✓ App launches. Previously cached articles are shown. A clear "no network" or "offline" indicator appears on pull-to-refresh. No crash.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-02</span>
+        <div class="test-title">Resume after long background period</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Background the app and use other apps for 30+ minutes.</li>
+          <li>Return to ShiftFeed.</li>
+        </ol>
+        <div class="expected">✓ App resumes without crashing. Feed re-fetches new content. No stale spinner or frozen screen.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-03</span>
+        <div class="test-title">Foreground push notification handling</div>
+      </div>
+      <div class="badges"><span class="badge badge-native">Native only</span></div>
+      <div class="test-body">
+        <div class="label">Precondition</div>
+        <p style="font-size:0.875rem;margin-bottom:0.35rem;">Ask the developer to send a test push while you keep the app open.</p>
+        <div class="label">Steps</div>
+        <ol>
+          <li>Keep ShiftFeed in the foreground.</li>
+          <li>Receive a push notification.</li>
+        </ol>
+        <div class="expected">✓ An in-app banner or SnackBar appears — no system notification tray item visible. No crash. App state is unaffected.</div>
+      </div>
+    </div>
+
+    <div class="test-case">
+      <div class="test-header">
+        <div class="test-checkbox"></div>
+        <span class="test-id">T-EDGE-04</span>
+        <div class="test-title">State persistence across cold restart</div>
+      </div>
+      <div class="badges"><span class="badge badge-free">Free</span></div>
+      <div class="test-body">
+        <div class="label">Steps</div>
+        <ol>
+          <li>Bookmark two articles, switch to dark mode, sign in.</li>
+          <li>Kill the app completely from recents.</li>
+          <li>Relaunch.</li>
+        </ol>
+        <div class="expected">✓ Bookmarks are present. Dark mode is active. Signed-in state is maintained. Topic preferences are unchanged.</div>
+      </div>
+    </div>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <!-- SECTION 17: SIGN-OFF -->
+  <section id="signoff">
+    <h2><span class="num">17</span> Final sign-off</h2>
+    <p>Please fill in the table below and include it in your feedback report.</p>
+
+    <table class="signoff-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Your entry</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Tester name</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Device model</td><td class="write">&nbsp;</td></tr>
+        <tr><td>OS version</td><td class="write">&nbsp;</td></tr>
+        <tr><td>App version</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Date tested</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Total tests passed</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Total tests failed</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Blocker count (crashes / data loss)</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Overall impression (1–5)</td><td class="write">&nbsp;</td></tr>
+        <tr><td>Most critical issue found</td><td class="write">&nbsp;</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:1rem;">When you're done, send your completed sign-off and any bug reports to:</p>
+    <div class="contact-box">
+      <span style="font-size:1.25rem;">✉</span>
+      <a href="mailto:bobek.roman@gmail.com">bobek.roman@gmail.com</a>
+    </div>
+
+    <p style="margin-top:1rem;color:var(--muted);font-size:0.875rem;">Thank you for taking the time to test ShiftFeed. Your feedback directly shapes what gets fixed before the public release.</p>
+
+    <div class="back-to-top"><a href="#top">↑ Back to top</a></div>
+  </section>
+
+  <footer>
+    <p>ShiftFeed &nbsp;·&nbsp; Beta Test Plan &nbsp;·&nbsp; Golden Gate release &nbsp;·&nbsp; Mobile only</p>
+    <p style="margin-top:0.4rem;">Effective May 07, 2026 &nbsp;·&nbsp; Web and desktop builds are out of scope for this round.</p>
+  </footer>
+
+</div>
+</body>
+</html>
